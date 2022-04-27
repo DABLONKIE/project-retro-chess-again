@@ -1,0 +1,72 @@
+{
+    "image1": {
+        "data": "hwQMAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPD/AADw//DwH/QAAB8RTx8R9AAAHxFBERH0AAAfEUERQfQAAB8RTx9B9AAA8P/w8E/0AAAAAAAA8P8AAAAAAAAAAAAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "whitePawn"
+    },
+    "image2": {
+        "data": "hwQMAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//AAAAAP/w9fQAAPDwEf8V9AAAHx8U8RX0AABPH1HxRfQAAPDwEf9F9AAAAAD/8PX0AAAAAAAAD/8AAAAAAAAAAAAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "whiteBishop"
+    },
+    "image3": {
+        "data": "hwQMAAwAAAAAAAAAAAAAAAAAAAD//wAA///w/x/0AABP8f9RFfQAAP9RUVUR9AAAT1FVURX0AABPUVFVQfQAAP9RVVFF9AAAT/H/VUT0AAD///D/T/QAAAAAAAD//wAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "whiteRook"
+    },
+    "image4": {
+        "data": "hwQMAAwAAAAAAAAAAAAAAADw/w8AAAAAAB8RD///AADwQRH/8fQAAF8R8fBR9AAA8BERH1H0AADwERERUfQAAPAVERFR9AAAAF8REfH0AAAA8BXx//8AAAAA/w8AAAAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "whiteKnight"
+    },
+    "image5": {
+        "data": "hwQMAAwAAAAAAAAAAAAAAAAAAAAAAAAAAPAAAAD/AAAAX/8A8PQAAPD0Ef8f9AAAT18RERH0AABPXxEREfQAAPD0Ef8f9AAAAF//APD0AAAA8AAAAP8AAAAAAAAAAAAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "whiteQueen"
+    },
+    "image6": {
+        "data": "hwQMAA0AAAAAAAAAAAAAAAAAAAAAAAAAAAD/AADwDwAAD1//8E8PAPD1XxEfQQ8AX1VfERFBDwBfVV8REUQPAPD1XxEfRA8AAA9f//BPDwAAAP8AAPAPAAAAAAAAAAAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "whiteKing"
+    },
+    "image7": {
+        "data": "hwQMAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPD/AADw//Dwf/YAAH93j3939gAAf3eHd3f2AAB/d4d3Z/YAAH93j39n9gAA8P/w8G/2AAAAAAAA8P8AAAAAAAAAAAAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "blackPawn"
+    },
+    "image8": {
+        "data": "hwQMAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//AAAAAP/w+PYAAPDwd/949gAAf39293j2AABvf4f3aPYAAPDwd/9o9gAAAAD/8Pj2AAAAAAAAD/8AAAAAAAAAAAAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "blackBishop"
+    },
+    "image9": {
+        "data": "hwQMAAwAAAAAAAAAAAAAAAAAAAD//wAA///w/3/2AABv9/+HePYAAP+Hh4h39gAAb4eIh3j2AABvh4eIZ/YAAP+HiIdo9gAAb/f/iGb2AAD///D/b/YAAAAAAAD//wAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "blackRook"
+    },
+    "image10": {
+        "data": "hwQMAAwAAAAAAAAAAAAAAADw/w8AAAAAAH93D///AADwZ3f/9/YAAI939/CH9gAA8Hd3f4f2AADwd3d3h/YAAPB4d3eH9gAAAI93d/f2AAAA8Hj3//8AAAAA/w8AAAAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "blackKnight"
+    },
+    "image11": {
+        "data": "hwQMAAwAAAAAAAAAAAAAAAAAAAAAAAAAAPAAAAD/AAAAj/8A8PYAAPD2d/9/9gAAb493d3f2AABvj3d3d/YAAPD2d/9/9gAAAI//APD2AAAA8AAAAP8AAAAAAAAAAAAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "blackQueen"
+    },
+    "image12": {
+        "data": "hwQQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "myImage"
+    },
+    "image13": {
+        "data": "hwQMAA0AAAAAAAAAAAAAAAAAAAAAAAAAAAD/AADwDwAAD4//8G8PAPD4j3d/Zw8Aj4iPd3dnDwCPiI93d2YPAPD4j3d/Zg8AAA+P//BvDwAAAP8AAPAPAAAAAAAAAAAAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "blackKing"
+    },
+    "*": {
+        "mimeType": "image/x-mkcd-f4",
+        "dataEncoding": "base64",
+        "namespace": "myImages"
+    }
+}
