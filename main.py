@@ -103,7 +103,7 @@ pieces = [
     [6, 1, 4, 8],
     [5, 1, 5, 8]]
 
-pieces = [[6,1,5,6],[1,0,4,6,1]]
+#pieces = [[6,1,5,6],[1,0,4,6,1]]
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
     global pieceAssetReference, pieceSprites
