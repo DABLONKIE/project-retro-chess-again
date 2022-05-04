@@ -32,22 +32,12 @@ let pawnFirstMove = false
 selector = null
 turnPawn = null
 let colorPalletteSwitched = true
+let gamma = 0
+UpdateColors()
 let checked = 2
 // 0 = white | 1 = black | 2 = none
 let pieceAssetReference = [assets.image`whitePawn`, assets.image`whiteBishop`, assets.image`whiteRook`, assets.image`whiteKnight`, assets.image`whiteQueen`, assets.image`whiteKing`, assets.image`blackPawn`, assets.image`blackBishop`, assets.image`blackRook`, assets.image`blackKnight`, assets.image`blackQueen`, assets.image`blackKing`]
 let killSpaceAssetRefernce = [assets.image`killSpace`, assets.image`debug`, assets.image`emptySpace`]
-if (true) {
-    color.setColor(3, color.rgb(80, 80, 80))
-    color.setColor(4, color.rgb(180, 180, 180))
-    color.setColor(5, color.rgb(209, 209, 209))
-    color.setColor(6, color.rgb(90, 90, 90))
-    color.setColor(7, color.rgb(50, 50, 50))
-    color.setColor(8, color.rgb(60, 60, 60))
-    color.setColor(10, color.rgb(50, 200, 50))
-    color.setColor(9, color.rgb(200, 0, 0))
-    color.setColor(14, color.rgb(50, 150, 50))
-}
-
 volume = 2
 //  Original Chess Positions
 //  0: 1=pawn  2=bishop  3=rook 4=knight 5=queen 6=king
@@ -544,6 +534,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
     
     // eliminar
     let pieceValidKillSpacesToCheck : number[][] = []
+    let pieceValidKillSpacesChecked : number[][] = []
     let killSpacesFound = false
     let x = pieces[pieceNum][2]
     let y = pieces[pieceNum][3]
@@ -1052,25 +1043,30 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         for (i = 0; i < pieces.length; i++) {
             for (let c = 0; c < pieceValidKillSpacesToCheck.length; c++) {
                 if (pieceValidKillSpacesToCheck[c][0] == pieces[i][2] && pieceValidKillSpacesToCheck[c][1] == pieces[i][3] && pieces[i][1] != whoseTurn) {
-                    pieceValidKillSpaces.push([pieces[i][2], pieces[i][3]])
+                    pieceValidKillSpacesChecked.push([pieces[i][2], pieces[i][3]])
                 }
                 
             }
         }
     } else {
-        pieceValidKillSpaces = pieceValidKillSpacesToCheck
+        pieceValidKillSpacesChecked = pieceValidKillSpacesToCheck
     }
     
-    if (arrayType == 1) {
-        for (i = 0; i < pieceValidKillSpaces.length; i++) {
-            pieceValidKillSpacesForChecks.push(pieceValidKillSpaces[i])
+    if (arrayType == 0) {
+        for (i = 0; i < pieceValidKillSpacesChecked.length; i++) {
+            pieceValidKillSpaces.push(pieceValidKillSpacesChecked[i])
         }
-        pieceValidKillSpaces = []
+        pieceValidKillSpacesChecked = []
+    } else if (arrayType == 1) {
+        for (i = 0; i < pieceValidKillSpacesChecked.length; i++) {
+            pieceValidKillSpacesForChecks.push(pieceValidKillSpacesChecked[i])
+        }
+        pieceValidKillSpacesChecked = []
     } else if (arrayType == 2) {
-        for (i = 0; i < pieceValidKillSpaces.length; i++) {
-            pieceValidKillSpacesCheckAll.push(pieceValidKillSpaces[i])
+        for (i = 0; i < pieceValidKillSpacesChecked.length; i++) {
+            pieceValidKillSpacesCheckAll.push(pieceValidKillSpacesChecked[i])
+            pieceValidKillSpacesChecked = []
         }
-        pieceValidKillSpaces = []
     }
     
     if (pieceValidKillSpaces.length == 0) {
@@ -1209,6 +1205,23 @@ function PromotionSequence(pnum: number) {
     })
 }
 
+function UpdateColors() {
+    // Change color pallette, it would look dumb otherwise.
+    
+    color.setColor(1, color.rgb(CalGamma(255), CalGamma(255), CalGamma(255)))
+    color.setColor(2, color.rgb(CalGamma(255), 0, 0))
+    color.setColor(3, color.rgb(CalGamma(80), CalGamma(80), CalGamma(80)))
+    color.setColor(4, color.rgb(CalGamma(180), CalGamma(180), CalGamma(180)))
+    color.setColor(5, color.rgb(CalGamma(209), CalGamma(209), CalGamma(209)))
+    color.setColor(6, color.rgb(CalGamma(90), CalGamma(90), CalGamma(90)))
+    color.setColor(7, color.rgb(CalGamma(50), CalGamma(50), CalGamma(50)))
+    color.setColor(8, color.rgb(CalGamma(60), CalGamma(60), CalGamma(60)))
+    color.setColor(10, color.rgb(CalGamma(50), CalGamma(200), CalGamma(50)))
+    color.setColor(9, color.rgb(CalGamma(200), 0, 0))
+    color.setColor(14, color.rgb(CalGamma(50), CalGamma(150), CalGamma(50)))
+    color.setColor(15, color.rgb(CalGamma(0), CalGamma(0), CalGamma(0)))
+}
+
 //  ---------------------------------------------------------------------------------------- Selector Funcs
 function SelectorGoRIGHT() {
     if (!(selectorData[0] == 8)) {
@@ -1290,6 +1303,7 @@ function selectorPickUp() {
             pieceSprites[selectorData[2]].setPosition(pieceSprites[selectorData[2]].x, pieceSprites[selectorData[2]].y)
             pieceSprites[selectorData[2]].z = 90
             tempMemory = selectorData[2]
+            SafeAnimPause(180, true)
             timer.after(60, function frame1() {
                 pieceSprites[tempMemory].y += 1
             })
@@ -1401,22 +1415,38 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
             pieces[selectorData[2]][4] = 0
         }
         
-        SetPositionOnBoard(pieceSprites[selectorData[2]], pieces[selectorData[2]][2], pieces[selectorData[2]][3], true)
+        SetPositionOnBoard(pieceSprites[selectorData[2]], pieces[selectorData[2]][2], pieces[selectorData[2]][3])
         for (i = 0; i < pieceValidSprites.length; i++) {
             pieceValidSprites[i].destroy()
         }
         for (i = 0; i < pieceValidKillSprites.length; i++) {
-            CreateTempSprite(300, assets.animation`killSpaceDisappear`, pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 100, 1, 1, 3)
+            if (pieceValidKillSpaces[i][0] == pieces[selectorData[2]][2] && pieceValidKillSpaces[i][1] == pieces[selectorData[2]][3]) {
+                CreateTempSprite(1000, assets.animation`killSpaceKill`, pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 80, 1, 1, 10)
+            } else {
+                CreateTempSprite(300, assets.animation`killSpaceDisappear`, pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 100, 1, 1, 3)
+            }
+            
             pieceValidKillSprites[i].destroy()
         }
         if (!noAnim && !promotion) {
             animation.runImageAnimation(selector, assets.animation`selectorPutdownAnim`, 50, false)
             tempMemory = selectorData[2]
+            pieceSprites[tempMemory].y -= 9
+            SafeAnimPause(250)
             timer.after(50, function frame1() {
                 pieceSprites[tempMemory].y += 5
             })
+            timer.after(100, function frame2() {
+                pieceSprites[tempMemory].y += 4
+            })
+            timer.after(200, function frame3() {
+                pieceSprites[tempMemory].y += 1
+            })
+            timer.after(250, function frame4() {
+                pieceSprites[tempMemory].y -= 1
+            })
         } else if (!promotion) {
-            pieceSprites[selectorData[2]].y -= 1
+            // pieceSprites[selectorData[2]].y -= 1
             selector.setImage(assets.image`selector`)
         } else if (promotion) {
             PromotionSequence(selectorData[2])
@@ -1473,6 +1503,15 @@ function SafePause(time: number, mode: boolean = false) {
     BindAll(mode)
 }
 
+function SafeAnimPause(time: number, mode: boolean = false) {
+    // Unbinds all buttons for set amount of time, to let animations play.
+    timer.background(function wait() {
+        UnbindAll()
+        pause(time)
+        BindAll(mode)
+    })
+}
+
 function ButtonBoundSelectorPutDown() {
     // A function with no inputs to be bound to the button.
     selectorPutDown()
@@ -1509,6 +1548,7 @@ function IsNumOutOfBounds(numberGiven: number): boolean {
 }
 
 function UnbindAll() {
+    // Unbinds all buttons.
     controller.A.onEvent(ControllerButtonEvent.Pressed, null)
     controller.up.onEvent(ControllerButtonEvent.Pressed, null)
     controller.down.onEvent(ControllerButtonEvent.Pressed, null)
@@ -1517,6 +1557,7 @@ function UnbindAll() {
 }
 
 function BindAll(mode: boolean = false) {
+    // Binds all buttons back.
     if (mode) {
         controller.A.onEvent(ControllerButtonEvent.Pressed, ButtonBoundSelectorPutDown)
         controller.B.onEvent(ControllerButtonEvent.Pressed, selectorPutDownCancel)
@@ -1528,6 +1569,20 @@ function BindAll(mode: boolean = false) {
     controller.down.onEvent(ControllerButtonEvent.Pressed, SelectorGoDOWN)
     controller.left.onEvent(ControllerButtonEvent.Pressed, SelectorGoLEFT)
     controller.right.onEvent(ControllerButtonEvent.Pressed, SelectorGoRIGHT)
+}
+
+function CalGamma(val: number): number {
+    // Caps out brightness values to stop looping and adds gamma settings.exists("").
+    
+    val += gamma
+    if (val > 255) {
+        return 255
+    } else if (val < 0) {
+        return 0
+    } else {
+        return val
+    }
+    
 }
 
 //  ---------------------------------------------------------------------------------------- Sound Funcs

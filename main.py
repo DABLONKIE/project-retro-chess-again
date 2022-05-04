@@ -33,6 +33,8 @@ pawnFirstMove = False
 selector = None
 turnPawn = None
 colorPalletteSwitched = True
+gamma = 0
+UpdateColors()
 checked = 2 #0 = white | 1 = black | 2 = none
 pieceAssetReference = [
     assets.image("""whitePawn"""),
@@ -51,16 +53,7 @@ killSpaceAssetRefernce = [
     assets.image("""killSpace"""),
     assets.image("""debug"""),
     assets.image("""emptySpace""")]
-if True:
-    color.set_color(3, color.rgb(80, 80, 80))
-    color.set_color(4, color.rgb(180, 180, 180))
-    color.set_color(5, color.rgb(209, 209, 209))
-    color.set_color(6, color.rgb(90, 90, 90))
-    color.set_color(7, color.rgb(50, 50, 50))
-    color.set_color(8, color.rgb(60, 60, 60))
-    color.set_color(10, color.rgb(50, 200, 50))
-    color.set_color(9, color.rgb(200, 0, 0))
-    color.set_color(14, color.rgb(50, 150, 50))
+
 volume = 2
 
 # Original Chess Positions
@@ -405,6 +398,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
         print("CalculateKillSpaces-arrayType-"+arrayType)
     #eliminar
     pieceValidKillSpacesToCheck: List[List[number]] = []
+    pieceValidKillSpacesChecked: List[List[number]] = []
     killSpacesFound = False
     x = pieces[pieceNum][2]
     y = pieces[pieceNum][3]
@@ -684,17 +678,21 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
         for i in range(len(pieces)):
             for c in range(len(pieceValidKillSpacesToCheck)):
                 if (pieceValidKillSpacesToCheck[c][0] == pieces[i][2] and pieceValidKillSpacesToCheck[c][1] == pieces[i][3] and pieces[i][1] != whoseTurn):
-                    pieceValidKillSpaces.append([pieces[i][2], pieces[i][3]])
+                    pieceValidKillSpacesChecked.append([pieces[i][2], pieces[i][3]])
     else:
-        pieceValidKillSpaces = pieceValidKillSpacesToCheck
-    if arrayType == 1:
-        for i in range(len(pieceValidKillSpaces)):
-            pieceValidKillSpacesForChecks.append(pieceValidKillSpaces[i])
-        pieceValidKillSpaces = []
+        pieceValidKillSpacesChecked = pieceValidKillSpacesToCheck
+    if arrayType == 0:
+        for i in range(len(pieceValidKillSpacesChecked)):
+            pieceValidKillSpaces.append(pieceValidKillSpacesChecked[i])
+        pieceValidKillSpacesChecked = []
+    elif arrayType == 1:
+        for i in range(len(pieceValidKillSpacesChecked)):
+            pieceValidKillSpacesForChecks.append(pieceValidKillSpacesChecked[i])
+        pieceValidKillSpacesChecked = []
     elif arrayType == 2:
-        for i in range(len(pieceValidKillSpaces)):
-            pieceValidKillSpacesCheckAll.append(pieceValidKillSpaces[i])
-        pieceValidKillSpaces = []
+        for i in range(len(pieceValidKillSpacesChecked)):
+            pieceValidKillSpacesCheckAll.append(pieceValidKillSpacesChecked[i])
+            pieceValidKillSpacesChecked = []
     if len(pieceValidKillSpaces) == 0:
         return False
 
@@ -795,7 +793,20 @@ def PromotionSequence(pnum): #Sequence of promoting a pawn, mostly code about ch
     controller.down.on_event(ControllerButtonEvent.PRESSED, GoDownRook)
     controller.left.on_event(ControllerButtonEvent.PRESSED, GoLeftKnight)
     controller.right.on_event(ControllerButtonEvent.PRESSED, GoRightQueen)
-
+def UpdateColors(): #Change color pallette, it would look dumb otherwise.
+    global gamma
+    color.set_color(1, color.rgb(CalGamma(255), CalGamma(255), CalGamma(255)))
+    color.set_color(2, color.rgb(CalGamma(255), 0, 0))
+    color.set_color(3, color.rgb(CalGamma(80), CalGamma(80), CalGamma(80)))
+    color.set_color(4, color.rgb(CalGamma(180), CalGamma(180), CalGamma(180)))
+    color.set_color(5, color.rgb(CalGamma(209), CalGamma(209), CalGamma(209)))
+    color.set_color(6, color.rgb(CalGamma(90), CalGamma(90), CalGamma(90)))
+    color.set_color(7, color.rgb(CalGamma(50), CalGamma(50), CalGamma(50)))
+    color.set_color(8, color.rgb(CalGamma(60), CalGamma(60), CalGamma(60)))
+    color.set_color(10, color.rgb(CalGamma(50), CalGamma(200), CalGamma(50)))
+    color.set_color(9, color.rgb(CalGamma(200), 0, 0))
+    color.set_color(14, color.rgb(CalGamma(50), CalGamma(150), CalGamma(50)))
+    color.set_color(15, color.rgb(CalGamma(0), CalGamma(0), CalGamma(0)))
 # ---------------------------------------------------------------------------------------- Selector Funcs
 def SelectorGoRIGHT():
     if not (selectorData[0] == 8):
@@ -858,7 +869,8 @@ def selectorPickUp():
             pieceSprites[selectorData[2]].set_position(pieceSprites[selectorData[2]].x,
                 pieceSprites[selectorData[2]].y)
             pieceSprites[selectorData[2]].z = 90
-            tempMemory = selectorData[2] 
+            tempMemory = selectorData[2]
+            SafeAnimPause(180, True)
             def frame1():
                 pieceSprites[tempMemory].y += 1
             timer.after(60, frame1)
@@ -942,20 +954,34 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
             pieces[selectorData[2]][4] = 0
         SetPositionOnBoard(pieceSprites[selectorData[2]],
             pieces[selectorData[2]][2],
-            pieces[selectorData[2]][3], True)
+            pieces[selectorData[2]][3])
         for i in range(len(pieceValidSprites)):
             pieceValidSprites[i].destroy()
         for i in range(len(pieceValidKillSprites)):
-            CreateTempSprite(300, assets.animation("""killSpaceDisappear"""), pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 100, 1, 1, 3)
+            if pieceValidKillSpaces[i][0] == pieces[selectorData[2]][2] and pieceValidKillSpaces[i][1] == pieces[selectorData[2]][3]:
+                CreateTempSprite(1000, assets.animation("""killSpaceKill"""), pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 80, 1, 1, 10)
+            else:
+                CreateTempSprite(300, assets.animation("""killSpaceDisappear"""), pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 100, 1, 1, 3)
             pieceValidKillSprites[i].destroy()
         if not noAnim and not promotion :
             animation.run_image_animation(selector,assets.animation("""selectorPutdownAnim"""), 50, False)
             tempMemory = selectorData[2]
+            pieceSprites[tempMemory].y -= 9
+            SafeAnimPause(250)
             def frame1():
                 pieceSprites[tempMemory].y += 5
             timer.after(50, frame1)
+            def frame2():
+                pieceSprites[tempMemory].y += 4
+            timer.after(100, frame2)
+            def frame3():
+                pieceSprites[tempMemory].y += 1
+            timer.after(200, frame3)
+            def frame4():
+                pieceSprites[tempMemory].y -= 1
+            timer.after(250, frame4)
         elif not promotion:
-            pieceSprites[selectorData[2]].y -= 1
+            #pieceSprites[selectorData[2]].y -= 1
             selector.set_image(assets.image("""selector"""))
         elif promotion:
             PromotionSequence(selectorData[2])
@@ -1005,6 +1031,12 @@ def SafePause(time, mode = False): #Stops the code for a second whilst unbinding
     UnbindAll()
     pause(time)
     BindAll(mode)
+def SafeAnimPause(time, mode = False): #Unbinds all buttons for set amount of time, to let animations play.
+    def wait():
+        UnbindAll()
+        pause(time)
+        BindAll(mode)
+    timer.background(wait)
 def ButtonBoundSelectorPutDown(): #A function with no inputs to be bound to the button.
     selectorPutDown()
 def CreateTempSprite(delay, spriteAnimation, x, y, speed, ox = 0, oy = 0, z = 100, chessPositions = False): #Creates a temporary sprite to play an animation
@@ -1026,13 +1058,13 @@ def IsNumOutOfBounds(numberGiven): #A compact version of checking if the coordin
         return True
     else:
         return False
-def UnbindAll():
+def UnbindAll(): #Unbinds all buttons.
     controller.A.on_event(ControllerButtonEvent.PRESSED, None)
     controller.up.on_event(ControllerButtonEvent.PRESSED, None)
     controller.down.on_event(ControllerButtonEvent.PRESSED, None)
     controller.left.on_event(ControllerButtonEvent.PRESSED, None)
     controller.right.on_event(ControllerButtonEvent.PRESSED, None)
-def BindAll(mode = False):
+def BindAll(mode = False): #Binds all buttons back.
     if mode:
         controller.A.on_event(ControllerButtonEvent.PRESSED, ButtonBoundSelectorPutDown)
         controller.B.on_event(ControllerButtonEvent.PRESSED, selectorPutDownCancel)
@@ -1042,6 +1074,15 @@ def BindAll(mode = False):
     controller.down.on_event(ControllerButtonEvent.PRESSED, SelectorGoDOWN)
     controller.left.on_event(ControllerButtonEvent.PRESSED, SelectorGoLEFT)
     controller.right.on_event(ControllerButtonEvent.PRESSED, SelectorGoRIGHT)
+def CalGamma(val):  #Caps out brightness values to stop looping and adds gamma settings.exists("").
+    global gamma
+    val += gamma
+    if val > 255:
+        return 255
+    elif val < 0:
+        return 0
+    else:
+        return val
 # ---------------------------------------------------------------------------------------- Sound Funcs
 
 # ---------------------------------------------------------------------------------------- Starting Code
