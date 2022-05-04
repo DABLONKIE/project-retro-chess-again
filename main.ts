@@ -1154,7 +1154,7 @@ function Setup() {
     checkText2.setText("-----")
     selector = sprites.create(assets.image`selector`, 0)
     turnPawn = sprites.create(assets.image`whitePawn`, 0)
-    selector.z = 100
+    selector.z = 4
     DrawPiecesProportionally()
     SetPositionOnBoard(selector, selectorData[0], selectorData[1])
     SetPositionOnBoard(turnPawn, 12, 8, false, 1)
@@ -1301,7 +1301,7 @@ function selectorPickUp() {
             controller.A.onEvent(ControllerButtonEvent.Pressed, ButtonBoundSelectorPutDown)
             controller.B.onEvent(ControllerButtonEvent.Pressed, selectorPutDownCancel)
             pieceSprites[selectorData[2]].setPosition(pieceSprites[selectorData[2]].x, pieceSprites[selectorData[2]].y)
-            pieceSprites[selectorData[2]].z = 90
+            pieceSprites[selectorData[2]].z = 3
             tempMemory = selectorData[2]
             SafeAnimPause(180, true)
             timer.after(60, function frame1() {
@@ -1328,7 +1328,7 @@ function selectorPickUp() {
             // PickUpSoundEffect()
             controller.A.onEvent(ControllerButtonEvent.Pressed, ButtonBoundSelectorPutDown)
             pieceSprites[selectorData[2]].setPosition(pieceSprites[selectorData[2]].x, pieceSprites[selectorData[2]].y - 10)
-            pieceSprites[selectorData[2]].z = 90
+            pieceSprites[selectorData[2]].z = 3
             pieceSprites[selectorData[2]].y += 1
             CalculateValidSpaces(selectorData[2], true)
             CalculateKillSpaces(selectorData[2], true, 0, false)
@@ -1421,9 +1421,9 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         }
         for (i = 0; i < pieceValidKillSprites.length; i++) {
             if (pieceValidKillSpaces[i][0] == pieces[selectorData[2]][2] && pieceValidKillSpaces[i][1] == pieces[selectorData[2]][3]) {
-                CreateTempSprite(1000, assets.animation`killSpaceKill`, pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 80, 1, 1, 10)
+                CreateTempSprite(1000, assets.animation`killSpaceKill`, pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 80, 0, 0, 5)
             } else {
-                CreateTempSprite(300, assets.animation`killSpaceDisappear`, pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 100, 1, 1, 3)
+                CreateTempSprite(300, assets.animation`killSpaceDisappear`, pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 100, 0, 0, 5)
             }
             
             pieceValidKillSprites[i].destroy()

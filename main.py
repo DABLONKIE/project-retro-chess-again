@@ -747,7 +747,7 @@ def Setup(): #Initialize Commands, game is inert without them.
     checkText2.set_text("-----")
     selector = sprites.create(assets.image("""selector"""), 0)
     turnPawn = sprites.create(assets.image("""whitePawn"""), 0)
-    selector.z = 100
+    selector.z = 4
 
     DrawPiecesProportionally()
     SetPositionOnBoard(selector, selectorData[0], selectorData[1])
@@ -868,7 +868,7 @@ def selectorPickUp():
             controller.B.on_event(ControllerButtonEvent.PRESSED, selectorPutDownCancel)
             pieceSprites[selectorData[2]].set_position(pieceSprites[selectorData[2]].x,
                 pieceSprites[selectorData[2]].y)
-            pieceSprites[selectorData[2]].z = 90
+            pieceSprites[selectorData[2]].z = 3
             tempMemory = selectorData[2]
             SafeAnimPause(180, True)
             def frame1():
@@ -896,7 +896,7 @@ def selectorPickUp():
             controller.A.on_event(ControllerButtonEvent.PRESSED, ButtonBoundSelectorPutDown)
             pieceSprites[selectorData[2]].set_position(pieceSprites[selectorData[2]].x,
                 pieceSprites[selectorData[2]].y - 10)
-            pieceSprites[selectorData[2]].z = 90
+            pieceSprites[selectorData[2]].z = 3
             pieceSprites[selectorData[2]].y += 1
             CalculateValidSpaces(selectorData[2],True)
             CalculateKillSpaces(selectorData[2],True,0,False)
@@ -959,9 +959,9 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
             pieceValidSprites[i].destroy()
         for i in range(len(pieceValidKillSprites)):
             if pieceValidKillSpaces[i][0] == pieces[selectorData[2]][2] and pieceValidKillSpaces[i][1] == pieces[selectorData[2]][3]:
-                CreateTempSprite(1000, assets.animation("""killSpaceKill"""), pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 80, 1, 1, 10)
+                CreateTempSprite(1000, assets.animation("""killSpaceKill"""), pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 80, 0, 0, 5)
             else:
-                CreateTempSprite(300, assets.animation("""killSpaceDisappear"""), pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 100, 1, 1, 3)
+                CreateTempSprite(300, assets.animation("""killSpaceDisappear"""), pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 100, 0, 0, 5)
             pieceValidKillSprites[i].destroy()
         if not noAnim and not promotion :
             animation.run_image_animation(selector,assets.animation("""selectorPutdownAnim"""), 50, False)
