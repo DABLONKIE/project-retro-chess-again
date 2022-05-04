@@ -81,7 +81,7 @@ function SetPositionOnBoard(sprite: Sprite, toX: number, toY: number, selected: 
     let goX = 6 + 12 * toX + OffX
     let goY = 117 - 12 * toY + OffY
     if (selected) {
-        goY -= 2
+        goY -= 10
     }
     
     if (!(sprite == null)) {
@@ -1267,6 +1267,7 @@ function SelectorGoDOWN() {
 }
 
 function selectorPickUp() {
+    let tempMemory: number;
     
     let somethingFound = false
     for (let i = 0; i < pieces.length; i++) {
@@ -1286,13 +1287,27 @@ function selectorPickUp() {
             // PickUpSoundEffect()
             controller.A.onEvent(ControllerButtonEvent.Pressed, ButtonBoundSelectorPutDown)
             controller.B.onEvent(ControllerButtonEvent.Pressed, selectorPutDownCancel)
-            pieceSprites[selectorData[2]].setPosition(pieceSprites[selectorData[2]].x, pieceSprites[selectorData[2]].y - 2)
+            pieceSprites[selectorData[2]].setPosition(pieceSprites[selectorData[2]].x, pieceSprites[selectorData[2]].y)
             pieceSprites[selectorData[2]].z = 90
-            pieceSprites[selectorData[2]].y += 1
+            tempMemory = selectorData[2]
+            timer.after(60, function frame1() {
+                pieceSprites[tempMemory].y += 1
+            })
+            timer.after(90, function frame2() {
+                pieceSprites[tempMemory].y -= 1
+            })
+            timer.after(120, function frame3() {
+                pieceSprites[tempMemory].y -= 3
+            })
+            timer.after(150, function frame4() {
+                pieceSprites[tempMemory].y -= 5
+            })
+            timer.after(180, function frame5() {
+                pieceSprites[tempMemory].y -= 1
+            })
             CalculateValidSpaces(selectorData[2], true)
             CalculateKillSpaces(selectorData[2], true)
             pieceFound = false
-            pieceSprites[selectorData[2]].y -= 1
         } else if (CalculateKillSpaces(selectorData[2])) {
             console.log("PickUp-moves failed, kills valid")
             animation.runImageAnimation(selector, assets.animation`selectorPickupAnim`, 30, false)
@@ -1386,8 +1401,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
             pieces[selectorData[2]][4] = 0
         }
         
-        SetPositionOnBoard(pieceSprites[selectorData[2]], pieces[selectorData[2]][2], pieces[selectorData[2]][3])
-        pieceSprites[selectorData[2]].y += 1
+        SetPositionOnBoard(pieceSprites[selectorData[2]], pieces[selectorData[2]][2], pieces[selectorData[2]][3], true)
         for (i = 0; i < pieceValidSprites.length; i++) {
             pieceValidSprites[i].destroy()
         }
@@ -1398,8 +1412,8 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         if (!noAnim && !promotion) {
             animation.runImageAnimation(selector, assets.animation`selectorPutdownAnim`, 50, false)
             tempMemory = selectorData[2]
-            timer.after(50, function on_after() {
-                pieceSprites[tempMemory].y -= 1
+            timer.after(50, function frame1() {
+                pieceSprites[tempMemory].y += 5
             })
         } else if (!promotion) {
             pieceSprites[selectorData[2]].y -= 1
@@ -1436,7 +1450,7 @@ function SwitchingSides() {
     
     console.log("----------------------SIDES-SWITCHED")
     if (whoseTurn == 0) {
-        animation.runImageAnimation(turnPawn, assets.animation`whiteTurnBlack`, 50, false)
+        animation.runImageAnimation(turnPawn, assets.animation`whiteTurnBlack`, 80, false)
         turnPawn.setImage(assets.image`
             blackPawn
         `)
@@ -1454,23 +1468,9 @@ function SwitchingSides() {
 
 function SafePause(time: number, mode: boolean = false) {
     // Stops the code for a second whilst unbinding the buttons to stop exploits.
-    controller.A.onEvent(ControllerButtonEvent.Pressed, null)
-    controller.up.onEvent(ControllerButtonEvent.Pressed, null)
-    controller.down.onEvent(ControllerButtonEvent.Pressed, null)
-    controller.left.onEvent(ControllerButtonEvent.Pressed, null)
-    controller.right.onEvent(ControllerButtonEvent.Pressed, null)
+    UnbindAll()
     pause(time)
-    if (mode) {
-        controller.A.onEvent(ControllerButtonEvent.Pressed, ButtonBoundSelectorPutDown)
-        controller.B.onEvent(ControllerButtonEvent.Pressed, selectorPutDownCancel)
-    } else {
-        controller.A.onEvent(ControllerButtonEvent.Pressed, selectorPickUp)
-    }
-    
-    controller.up.onEvent(ControllerButtonEvent.Pressed, SelectorGoUP)
-    controller.down.onEvent(ControllerButtonEvent.Pressed, SelectorGoDOWN)
-    controller.left.onEvent(ControllerButtonEvent.Pressed, SelectorGoLEFT)
-    controller.right.onEvent(ControllerButtonEvent.Pressed, SelectorGoRIGHT)
+    BindAll(mode)
 }
 
 function ButtonBoundSelectorPutDown() {

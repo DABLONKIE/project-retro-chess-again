@@ -120,7 +120,7 @@ def SetPositionOnBoard(sprite: Sprite, toX, toY, selected = False, OffX = 0, Off
     goX = (6 + 12 * toX) + OffX
     goY = (117 - 12 * toY) + OffY
     if selected:
-        goY -= 2
+        goY -= 10
     if not sprite == None: sprite.set_position(goX, goY)
     return goX, goY
 def CalculateValidSpaces(pieceNum, draw = False): #Calculates move spaces for the specified piece.
@@ -856,13 +856,27 @@ def selectorPickUp():
             controller.A.on_event(ControllerButtonEvent.PRESSED, ButtonBoundSelectorPutDown)
             controller.B.on_event(ControllerButtonEvent.PRESSED, selectorPutDownCancel)
             pieceSprites[selectorData[2]].set_position(pieceSprites[selectorData[2]].x,
-                pieceSprites[selectorData[2]].y - 2)
+                pieceSprites[selectorData[2]].y)
             pieceSprites[selectorData[2]].z = 90
-            pieceSprites[selectorData[2]].y += 1
+            tempMemory = selectorData[2] 
+            def frame1():
+                pieceSprites[tempMemory].y += 1
+            timer.after(60, frame1)
+            def frame2():
+                pieceSprites[tempMemory].y -= 1
+            timer.after(90, frame2)
+            def frame3():
+                pieceSprites[tempMemory].y -= 3
+            timer.after(120, frame3)
+            def frame4():
+                pieceSprites[tempMemory].y -= 5
+            timer.after(150, frame4)
+            def frame5():
+                pieceSprites[tempMemory].y -= 1
+            timer.after(180, frame5)
             CalculateValidSpaces(selectorData[2],True)
             CalculateKillSpaces(selectorData[2],True)
             pieceFound = False
-            pieceSprites[selectorData[2]].y -= 1
         elif CalculateKillSpaces(selectorData[2]):
             print("PickUp-moves failed, kills valid")
             animation.run_image_animation(selector,assets.animation("""selectorPickupAnim"""), 30, False)
@@ -928,8 +942,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
             pieces[selectorData[2]][4] = 0
         SetPositionOnBoard(pieceSprites[selectorData[2]],
             pieces[selectorData[2]][2],
-            pieces[selectorData[2]][3])
-        pieceSprites[selectorData[2]].y += 1
+            pieces[selectorData[2]][3], True)
         for i in range(len(pieceValidSprites)):
             pieceValidSprites[i].destroy()
         for i in range(len(pieceValidKillSprites)):
@@ -938,9 +951,9 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
         if not noAnim and not promotion :
             animation.run_image_animation(selector,assets.animation("""selectorPutdownAnim"""), 50, False)
             tempMemory = selectorData[2]
-            def on_after():
-                pieceSprites[tempMemory].y -= 1
-            timer.after(50, on_after)
+            def frame1():
+                pieceSprites[tempMemory].y += 5
+            timer.after(50, frame1)
         elif not promotion:
             pieceSprites[selectorData[2]].y -= 1
             selector.set_image(assets.image("""selector"""))
@@ -972,7 +985,7 @@ def SwitchingSides(): #Switches the sides, self-explanatory.
     if whoseTurn == 0:
         animation.run_image_animation(turnPawn,
             assets.animation("""whiteTurnBlack"""),
-            50,
+            80,
             False)
         turnPawn.set_image(assets.image("""
             blackPawn
@@ -989,21 +1002,9 @@ def SwitchingSides(): #Switches the sides, self-explanatory.
         whoseTurn = 0
     CheckForChecks()
 def SafePause(time, mode = False): #Stops the code for a second whilst unbinding the buttons to stop exploits.
-    controller.A.on_event(ControllerButtonEvent.PRESSED, None)
-    controller.up.on_event(ControllerButtonEvent.PRESSED, None)
-    controller.down.on_event(ControllerButtonEvent.PRESSED, None)
-    controller.left.on_event(ControllerButtonEvent.PRESSED, None)
-    controller.right.on_event(ControllerButtonEvent.PRESSED, None)
+    UnbindAll()
     pause(time)
-    if mode:
-        controller.A.on_event(ControllerButtonEvent.PRESSED, ButtonBoundSelectorPutDown)
-        controller.B.on_event(ControllerButtonEvent.PRESSED, selectorPutDownCancel)
-    else:
-        controller.A.on_event(ControllerButtonEvent.PRESSED, selectorPickUp)
-    controller.up.on_event(ControllerButtonEvent.PRESSED, SelectorGoUP)
-    controller.down.on_event(ControllerButtonEvent.PRESSED, SelectorGoDOWN)
-    controller.left.on_event(ControllerButtonEvent.PRESSED, SelectorGoLEFT)
-    controller.right.on_event(ControllerButtonEvent.PRESSED, SelectorGoRIGHT)
+    BindAll(mode)
 def ButtonBoundSelectorPutDown(): #A function with no inputs to be bound to the button.
     selectorPutDown()
 def CreateTempSprite(delay, spriteAnimation, x, y, speed, ox = 0, oy = 0, z = 100, chessPositions = False): #Creates a temporary sprite to play an animation
