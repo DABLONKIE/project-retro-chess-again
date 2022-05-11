@@ -97,7 +97,7 @@ pieces = [
     [6, 1, 4, 8],
     [5, 1, 5, 8]]
 
-#pieces = [[6,1,5,6],[1,0,4,6,1]]
+pieces = [[6,1,5,6],[1,0,4,6,1]]
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
     global pieceAssetReference, pieceSprites
@@ -759,7 +759,7 @@ def Setup(): #Initialize Commands, game is inert without them.
     controller.down.on_event(ControllerButtonEvent.PRESSED, SelectorGoDOWN)
     controller.left.on_event(ControllerButtonEvent.PRESSED, SelectorGoLEFT)
     controller.right.on_event(ControllerButtonEvent.PRESSED, SelectorGoRIGHT)
-def PromotionSequence(pnum): #Sequence of promoting a pawn, mostly code about chosing the piece
+def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code about chosing the piece
     global pieceSprites, pieces
     UnbindAll()
     selector.set_image(assets.image("""selectorPromotion"""))
@@ -948,6 +948,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
             #CreateTempSprite(300, assets.animation("""returnToDust"""), tempX, tempY, 60)
             break
     if placeFound or bypassCheck:
+        teamBuffer = whoseTurn
         if not doNotSwitch: SwitchingSides()
         promotion = False;
         #PutDownSoundEffect()
@@ -1002,7 +1003,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
             #pieceSprites[selectorData[2]].y -= 1
             selector.set_image(assets.image("""selector"""))
         elif promotion:
-            PromotionSequence(selectorData[2])
+            PromotionSequence(selectorData[2], teamBuffer)
         selectorData[2] = None
         pieceValidSprites = []
         pieceValidSpaces = []
@@ -1092,7 +1093,7 @@ def BindAll(mode = False): #Binds all buttons back.
     controller.down.on_event(ControllerButtonEvent.PRESSED, SelectorGoDOWN)
     controller.left.on_event(ControllerButtonEvent.PRESSED, SelectorGoLEFT)
     controller.right.on_event(ControllerButtonEvent.PRESSED, SelectorGoRIGHT)
-def CalGamma(val):  #Caps out brightness values to stop looping and adds gamma settings.exists("").
+def CalGamma(val):  #Caps out brightness values to stop looping and adds gamma.
     global gamma
     val += gamma
     if val > 255:
@@ -1101,7 +1102,13 @@ def CalGamma(val):  #Caps out brightness values to stop looping and adds gamma s
         return 0
     else:
         return val
-# ---------------------------------------------------------------------------------------- Sound Funcs
+def CalPieceSprite(pieceClass, team):
+    global pieceAssetReference
+    offset = -1
+    if team == 1:
+        offset = 5
+    spriteIndex = pieceClass + offset
+    return pieceAssetReference[spriteIndex]
 
 # ---------------------------------------------------------------------------------------- Starting Code
 controller.menu.on_event(ControllerButtonEvent.PRESSED, None)

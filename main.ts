@@ -46,7 +46,7 @@ volume = 2
 //  2 & 3: numbers are coordinates. Letters and numbers respectively.
 //  4: special tag, for example, pawn not moved, king castlin
 pieces = [[1, 0, 1, 2, 1], [1, 0, 2, 2, 1], [1, 0, 3, 2, 1], [1, 0, 4, 2, 1], [1, 0, 5, 2, 1], [1, 0, 6, 2, 1], [1, 0, 7, 2, 1], [1, 0, 8, 2, 1], [3, 0, 1, 1], [3, 0, 8, 1], [4, 0, 2, 1], [4, 0, 7, 1], [2, 0, 3, 1], [2, 0, 6, 1], [6, 0, 4, 1], [5, 0, 5, 1], [1, 1, 1, 7, 1], [1, 1, 2, 7, 1], [1, 1, 3, 7, 1], [1, 1, 4, 7, 1], [1, 1, 5, 7, 1], [1, 1, 6, 7, 1], [1, 1, 7, 7, 1], [1, 1, 8, 7, 1], [3, 1, 1, 8], [3, 1, 8, 8], [4, 1, 2, 8], [4, 1, 7, 8], [2, 1, 3, 8], [2, 1, 6, 8], [6, 1, 4, 8], [5, 1, 5, 8]]
-// pieces = [[6,1,5,6],[1,0,4,6,1]]
+pieces = [[6, 1, 5, 6], [1, 0, 4, 6, 1]]
 //  ---------------------------------------------------------------------------------------- Board Funcs
 function DrawPiecesProportionally() {
     let offset: number;
@@ -1166,7 +1166,7 @@ function Setup() {
     controller.right.onEvent(ControllerButtonEvent.Pressed, SelectorGoRIGHT)
 }
 
-function PromotionSequence(pnum: number) {
+function PromotionSequence(pnum: number, team: number) {
     // Sequence of promoting a pawn, mostly code about chosing the piece
     
     UnbindAll()
@@ -1372,6 +1372,7 @@ function selectorPickUp() {
 // DenySoundEffect()
 function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = false, noAnim: boolean = false) {
     let i: number;
+    let teamBuffer: number;
     let promotion: boolean;
     let tempMemory: number;
     
@@ -1395,6 +1396,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         
     }
     if (placeFound || bypassCheck) {
+        teamBuffer = whoseTurn
         if (!doNotSwitch) {
             SwitchingSides()
         }
@@ -1467,7 +1469,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
             // pieceSprites[selectorData[2]].y -= 1
             selector.setImage(assets.image`selector`)
         } else if (promotion) {
-            PromotionSequence(selectorData[2])
+            PromotionSequence(selectorData[2], teamBuffer)
         }
         
         selectorData[2] = null
@@ -1590,7 +1592,7 @@ function BindAll(mode: boolean = false) {
 }
 
 function CalGamma(val: number): number {
-    // Caps out brightness values to stop looping and adds gamma settings.exists("").
+    // Caps out brightness values to stop looping and adds gamma.
     
     val += gamma
     if (val > 255) {
@@ -1603,7 +1605,17 @@ function CalGamma(val: number): number {
     
 }
 
-//  ---------------------------------------------------------------------------------------- Sound Funcs
+function CalPieceSprite(pieceClass: any, team: any): Image {
+    
+    let offset = -1
+    if (team == 1) {
+        offset = 5
+    }
+    
+    let spriteIndex = pieceClass + offset
+    return pieceAssetReference[spriteIndex]
+}
+
 //  ---------------------------------------------------------------------------------------- Starting Code
 controller.menu.onEvent(ControllerButtonEvent.Pressed, null)
 Setup()
