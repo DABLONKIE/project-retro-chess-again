@@ -34,6 +34,7 @@ selector = None
 turnPawn = None
 colorPalletteSwitched = True
 gamma = 0
+chosen = 0
 UpdateColors()
 checked = 2 #0 = white | 1 = black | 2 = none
 pieceAssetReference = [
@@ -764,7 +765,7 @@ def PromotionSequence(pnum): #Sequence of promoting a pawn, mostly code about ch
     selector.set_image(assets.image("""selectorPromotion"""))
     animation.run_image_animation(pieceSprites[pnum], assets.animation("promotionBegunWhite"), 50, False)
     promotionRing = sprites.create(assets.image("""promotionChooser"""))
-    animation.run_image_animation(promotionRing, assets.animation("""promotionExpandAnim"""), 50, False)
+    animation.run_image_animation(promotionRing, assets.animation("""promotionChooserAppear"""), 100, False)
     promotionBishop = sprites.create(assets.image("""whiteBishop"""))
     promotionRook = sprites.create(assets.image("""whiteRook"""))
     promotionKnight = sprites.create(assets.image("""whiteKnight"""))
@@ -776,23 +777,40 @@ def PromotionSequence(pnum): #Sequence of promoting a pawn, mostly code about ch
     SetPositionOnBoard(promotionKnight, pieces[pnum][2] - 1, pieces[pnum][3])
     SetPositionOnBoard(promotionQueen, pieces[pnum][2] + 1, pieces[pnum][3])
     def GoUpBishop():
+        global chosen
         chosen = 2
         SetPositionOnBoard(selector, pieces[pnum][2], pieces[pnum][3] + 1)
     def GoDownRook():
+        global chosen
         chosen = 3
         SetPositionOnBoard(selector, pieces[pnum][2], pieces[pnum][3] - 1)
     def GoLeftKnight():
+        global chosen
         chosen = 4
         SetPositionOnBoard(selector, pieces[pnum][2] - 1, pieces[pnum][3])
     def GoRightQueen():
+        global chosen
         chosen = 5
         SetPositionOnBoard(selector, pieces[pnum][2] + 1, pieces[pnum][3])
     def SelectPromotion():
-        pass
+        global chosen
+        pieces[pnum][0] = chosen
+        pieceSprites[pnum].set_image(pieceAssetReference[chosen - 1])
+        promotionBishop.destroy()
+        promotionRook.destroy()
+        promotionKnight.destroy()
+        promotionQueen.destroy()
+        promotionRing.destroy()
+        selector.set_image(assets.image("""selector"""))
+        SetPositionOnBoard(selector, pieces[pnum][2],pieces[pnum][3])
+        CreateTempSprite(700,assets.animation("""promotionChosen"""),pieces[pnum][2],pieces[pnum][3],100, 0, 0, 2, True)
+        BindAll()   
+    GoRightQueen()
     controller.up.on_event(ControllerButtonEvent.PRESSED, GoUpBishop)
     controller.down.on_event(ControllerButtonEvent.PRESSED, GoDownRook)
     controller.left.on_event(ControllerButtonEvent.PRESSED, GoLeftKnight)
     controller.right.on_event(ControllerButtonEvent.PRESSED, GoRightQueen)
+    controller.A.on_event(ControllerButtonEvent.PRESSED, SelectPromotion)
 def UpdateColors(): #Change color pallette, it would look dumb otherwise.
     global gamma
     color.set_color(1, color.rgb(CalGamma(255), CalGamma(255), CalGamma(255)))

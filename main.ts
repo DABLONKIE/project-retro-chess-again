@@ -33,6 +33,7 @@ selector = null
 turnPawn = null
 let colorPalletteSwitched = true
 let gamma = 0
+let chosen = 0
 UpdateColors()
 let checked = 2
 // 0 = white | 1 = black | 2 = none
@@ -1172,7 +1173,7 @@ function PromotionSequence(pnum: number) {
     selector.setImage(assets.image`selectorPromotion`)
     animation.runImageAnimation(pieceSprites[pnum], assets.animation`promotionBegunWhite`, 50, false)
     let promotionRing = sprites.create(assets.image`promotionChooser`)
-    animation.runImageAnimation(promotionRing, assets.animation`promotionExpandAnim`, 50, false)
+    animation.runImageAnimation(promotionRing, assets.animation`promotionChooserAppear`, 100, false)
     let promotionBishop = sprites.create(assets.image`whiteBishop`)
     let promotionRook = sprites.create(assets.image`whiteRook`)
     let promotionKnight = sprites.create(assets.image`whiteKnight`)
@@ -1183,25 +1184,42 @@ function PromotionSequence(pnum: number) {
     SetPositionOnBoard(promotionRook, pieces[pnum][2], pieces[pnum][3] - 1)
     SetPositionOnBoard(promotionKnight, pieces[pnum][2] - 1, pieces[pnum][3])
     SetPositionOnBoard(promotionQueen, pieces[pnum][2] + 1, pieces[pnum][3])
-    function SelectPromotion() {
+    function GoRightQueen() {
         
+        chosen = 5
+        SetPositionOnBoard(selector, pieces[pnum][2] + 1, pieces[pnum][3])
     }
     
+    GoRightQueen()
     controller.up.onEvent(ControllerButtonEvent.Pressed, function GoUpBishop() {
-        let chosen = 2
+        
+        chosen = 2
         SetPositionOnBoard(selector, pieces[pnum][2], pieces[pnum][3] + 1)
     })
     controller.down.onEvent(ControllerButtonEvent.Pressed, function GoDownRook() {
-        let chosen = 3
+        
+        chosen = 3
         SetPositionOnBoard(selector, pieces[pnum][2], pieces[pnum][3] - 1)
     })
     controller.left.onEvent(ControllerButtonEvent.Pressed, function GoLeftKnight() {
-        let chosen = 4
+        
+        chosen = 4
         SetPositionOnBoard(selector, pieces[pnum][2] - 1, pieces[pnum][3])
     })
-    controller.right.onEvent(ControllerButtonEvent.Pressed, function GoRightQueen() {
-        let chosen = 5
-        SetPositionOnBoard(selector, pieces[pnum][2] + 1, pieces[pnum][3])
+    controller.right.onEvent(ControllerButtonEvent.Pressed, GoRightQueen)
+    controller.A.onEvent(ControllerButtonEvent.Pressed, function SelectPromotion() {
+        
+        pieces[pnum][0] = chosen
+        pieceSprites[pnum].setImage(pieceAssetReference[chosen - 1])
+        promotionBishop.destroy()
+        promotionRook.destroy()
+        promotionKnight.destroy()
+        promotionQueen.destroy()
+        promotionRing.destroy()
+        selector.setImage(assets.image`selector`)
+        SetPositionOnBoard(selector, pieces[pnum][2], pieces[pnum][3])
+        CreateTempSprite(700, assets.animation`promotionChosen`, pieces[pnum][2], pieces[pnum][3], 100, 0, 0, 2, true)
+        BindAll()
     })
 }
 
