@@ -97,17 +97,13 @@ pieces = [
     [6, 1, 4, 8],
     [5, 1, 5, 8]]
 
-pieces = [[6,1,5,6],[1,0,4,6,1]]
+pieces = [[6,0,5,6],[1,1,4,2,1]]
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
     global pieceAssetReference, pieceSprites
     scene.set_background_image(assets.image("""chessBoard"""))
     for i in range(len(pieces)):
-        offset = -1
-        if pieces[i][1] == 1:
-            offset = 5
-        b = pieces[i][0] + offset
-        pieceSprites.append(sprites.create(pieceAssetReference[b]))
+        pieceSprites.append(sprites.create(CalPieceSprite(pieces[i][0],pieces[i][1])))
         SetPositionOnBoard(pieceSprites[i], pieces[i][2], pieces[i][3])
 def SetPositionOnBoard(sprite: Sprite, toX, toY, selected = False, OffX = 0, OffY = 0): #Handy function for setting pieces into position.
     #thank god i made this btw
@@ -361,9 +357,8 @@ def CalculateValidSpaces(pieceNum, draw = False): #Calculates move spaces for th
         for a in range(len(pieceValidKillSpacesCheckAll)):
             for b in range(len(pieceValidSpaces)):
                 if(pieceValidKillSpacesCheckAll[a][0] == pieceValidSpaces[b][0] and pieceValidKillSpacesCheckAll[a][1] == pieceValidSpaces[b][1]):
-                    if draw: CreateTempSprite(900, assets.animation("""invalidSpaceAnim"""), pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 50, 2, 2, 10, True)
+                    if draw: CreateTempSprite(750, assets.animation("""invalidSpaceAnim"""), pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 50, 0, 0, 10, True)
                     pieceValidSpaces.remove_at(b)
-        pieceValidKillSpacesCheckAll = []
     # Checking for invalid spaces (nonlinear = base check, linear = failsafe )
     piecesToCheck = len(pieces)
     piecesChecked = 0
@@ -683,17 +678,14 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
     else:
         pieceValidKillSpacesChecked = pieceValidKillSpacesToCheck
     if arrayType == 0:
-        for i in range(len(pieceValidKillSpacesChecked)):
-            pieceValidKillSpaces.append(pieceValidKillSpacesChecked[i])
+        pieceValidKillSpaces = pieceValidKillSpacesChecked
         pieceValidKillSpacesChecked = []
     elif arrayType == 1:
-        for i in range(len(pieceValidKillSpacesChecked)):
-            pieceValidKillSpacesForChecks.append(pieceValidKillSpacesChecked[i])
+        pieceValidKillSpacesForChecks = pieceValidKillSpacesChecked
         pieceValidKillSpacesChecked = []
     elif arrayType == 2:
-        for i in range(len(pieceValidKillSpacesChecked)):
-            pieceValidKillSpacesCheckAll.append(pieceValidKillSpacesChecked[i])
-            pieceValidKillSpacesChecked = []
+        pieceValidKillSpacesCheckAll = pieceValidKillSpacesChecked
+        pieceValidKillSpacesChecked = []
     if len(pieceValidKillSpaces) == 0:
         return False
 
@@ -737,10 +729,11 @@ def CheckForChecks(): #Is the king in peril?
     pieceValidKillSpacesForChecks = []
 def GetAllAttacksOfEnemies(): #Get ALL attack spaces of enemies for king movement
     global pieces, pieceValidKillSpacesForChecks, whoseTurn, pieceValidKillSpritesCheckAll
+    pieceValidKillSpritesCheckAll = []
     for i in range(pieces.length):
         if pieces[i][1] != whoseTurn:
             print("GetAllAttacksOfEnemies-RunningKillSpaceFor:"+pieces[i][0])
-            CalculateKillSpaces(i, True, 2, True)
+            CalculateKillSpaces(i, False, 2, True)
     #pieceValidKillSpritesCheckAll = []
 def Setup(): #Initialize Commands, game is inert without them.
     global selector, turnPawn
@@ -763,13 +756,14 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
     global pieceSprites, pieces
     UnbindAll()
     selector.set_image(assets.image("""selectorPromotion"""))
-    animation.run_image_animation(pieceSprites[pnum], assets.animation("promotionBegunWhite"), 50, False)
+    if team == 0: animation.run_image_animation(pieceSprites[pnum], assets.animation("promotionBegunWhite"), 50, False)
+    if team == 1: animation.run_image_animation(pieceSprites[pnum], assets.animation("promotionBegunBlack"), 50, False)
     promotionRing = sprites.create(assets.image("""promotionChooser"""))
     animation.run_image_animation(promotionRing, assets.animation("""promotionChooserAppear"""), 100, False)
-    promotionBishop = sprites.create(assets.image("""whiteBishop"""))
-    promotionRook = sprites.create(assets.image("""whiteRook"""))
-    promotionKnight = sprites.create(assets.image("""whiteKnight"""))
-    promotionQueen = sprites.create(assets.image("""whiteQueen"""))
+    promotionBishop = sprites.create(CalPieceSprite(2, team))
+    promotionRook = sprites.create(CalPieceSprite(3, team))
+    promotionKnight = sprites.create(CalPieceSprite(4, team))
+    promotionQueen = sprites.create(CalPieceSprite(5, team))
     SetPositionOnBoard(selector, pieces[pnum][2], pieces[pnum][3])
     SetPositionOnBoard(promotionRing, pieces[pnum][2], pieces[pnum][3])
     SetPositionOnBoard(promotionBishop, pieces[pnum][2], pieces[pnum][3] + 1)
@@ -795,7 +789,7 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
     def SelectPromotion():
         global chosen
         pieces[pnum][0] = chosen
-        pieceSprites[pnum].set_image(pieceAssetReference[chosen - 1])
+        pieceSprites[pnum].set_image(CalPieceSprite(chosen, team))
         promotionBishop.destroy()
         promotionRook.destroy()
         promotionKnight.destroy()
@@ -804,7 +798,7 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
         selector.set_image(assets.image("""selector"""))
         SetPositionOnBoard(selector, pieces[pnum][2],pieces[pnum][3])
         CreateTempSprite(700,assets.animation("""promotionChosen"""),pieces[pnum][2],pieces[pnum][3],100, 0, 0, 2, True)
-        BindAll()   
+        BindAll()
     GoRightQueen()
     controller.up.on_event(ControllerButtonEvent.PRESSED, GoUpBishop)
     controller.down.on_event(ControllerButtonEvent.PRESSED, GoDownRook)
@@ -969,6 +963,8 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
         if pieces[selectorData[2]][0] == 1:
             if pieces[selectorData[2]][1] == 0 and pieces[selectorData[2]][3] == 8:
                 promotion = True
+            if pieces[selectorData[2]][1] == 1 and pieces[selectorData[2]][3] == 1:
+                promotion = True
         if pieces[selectorData[2]][4] == 1 and not bypassCheck:
             pieces[selectorData[2]][4] = 0
         SetPositionOnBoard(pieceSprites[selectorData[2]],
@@ -1102,7 +1098,7 @@ def CalGamma(val):  #Caps out brightness values to stop looping and adds gamma.
         return 0
     else:
         return val
-def CalPieceSprite(pieceClass, team):
+def CalPieceSprite(pieceClass : number, team): #Get the sprite according to class type and team
     global pieceAssetReference
     offset = -1
     if team == 1:

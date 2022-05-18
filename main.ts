@@ -46,22 +46,14 @@ volume = 2
 //  2 & 3: numbers are coordinates. Letters and numbers respectively.
 //  4: special tag, for example, pawn not moved, king castlin
 pieces = [[1, 0, 1, 2, 1], [1, 0, 2, 2, 1], [1, 0, 3, 2, 1], [1, 0, 4, 2, 1], [1, 0, 5, 2, 1], [1, 0, 6, 2, 1], [1, 0, 7, 2, 1], [1, 0, 8, 2, 1], [3, 0, 1, 1], [3, 0, 8, 1], [4, 0, 2, 1], [4, 0, 7, 1], [2, 0, 3, 1], [2, 0, 6, 1], [6, 0, 4, 1], [5, 0, 5, 1], [1, 1, 1, 7, 1], [1, 1, 2, 7, 1], [1, 1, 3, 7, 1], [1, 1, 4, 7, 1], [1, 1, 5, 7, 1], [1, 1, 6, 7, 1], [1, 1, 7, 7, 1], [1, 1, 8, 7, 1], [3, 1, 1, 8], [3, 1, 8, 8], [4, 1, 2, 8], [4, 1, 7, 8], [2, 1, 3, 8], [2, 1, 6, 8], [6, 1, 4, 8], [5, 1, 5, 8]]
-pieces = [[6, 1, 5, 6], [1, 0, 4, 6, 1]]
+pieces = [[6, 0, 5, 6], [1, 1, 4, 2, 1]]
 //  ---------------------------------------------------------------------------------------- Board Funcs
 function DrawPiecesProportionally() {
-    let offset: number;
-    let b: number;
     // Takes the pieces array and creates pieces accordingly.
     
     scene.setBackgroundImage(assets.image`chessBoard`)
     for (let i = 0; i < pieces.length; i++) {
-        offset = -1
-        if (pieces[i][1] == 1) {
-            offset = 5
-        }
-        
-        b = pieces[i][0] + offset
-        pieceSprites.push(sprites.create(pieceAssetReference[b]))
+        pieceSprites.push(sprites.create(CalPieceSprite(pieces[i][0], pieces[i][1])))
         SetPositionOnBoard(pieceSprites[i], pieces[i][2], pieces[i][3])
     }
 }
@@ -471,7 +463,7 @@ function CalculateValidSpaces(pieceNum: number, draw: boolean = false): boolean 
             for (b = 0; b < pieceValidSpaces.length; b++) {
                 if (pieceValidKillSpacesCheckAll[a][0] == pieceValidSpaces[b][0] && pieceValidKillSpacesCheckAll[a][1] == pieceValidSpaces[b][1]) {
                     if (draw) {
-                        CreateTempSprite(900, assets.animation`invalidSpaceAnim`, pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 50, 2, 2, 10, true)
+                        CreateTempSprite(750, assets.animation`invalidSpaceAnim`, pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 50, 0, 0, 10, true)
                     }
                     
                     pieceValidSpaces.removeAt(b)
@@ -479,7 +471,6 @@ function CalculateValidSpaces(pieceNum: number, draw: boolean = false): boolean 
                 
             }
         }
-        pieceValidKillSpacesCheckAll = []
     }
     
     //  Checking for invalid spaces (nonlinear = base check, linear = failsafe )
@@ -1054,20 +1045,14 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
     }
     
     if (arrayType == 0) {
-        for (i = 0; i < pieceValidKillSpacesChecked.length; i++) {
-            pieceValidKillSpaces.push(pieceValidKillSpacesChecked[i])
-        }
+        pieceValidKillSpaces = pieceValidKillSpacesChecked
         pieceValidKillSpacesChecked = []
     } else if (arrayType == 1) {
-        for (i = 0; i < pieceValidKillSpacesChecked.length; i++) {
-            pieceValidKillSpacesForChecks.push(pieceValidKillSpacesChecked[i])
-        }
+        pieceValidKillSpacesForChecks = pieceValidKillSpacesChecked
         pieceValidKillSpacesChecked = []
     } else if (arrayType == 2) {
-        for (i = 0; i < pieceValidKillSpacesChecked.length; i++) {
-            pieceValidKillSpacesCheckAll.push(pieceValidKillSpacesChecked[i])
-            pieceValidKillSpacesChecked = []
-        }
+        pieceValidKillSpacesCheckAll = pieceValidKillSpacesChecked
+        pieceValidKillSpacesChecked = []
     }
     
     if (pieceValidKillSpaces.length == 0) {
@@ -1138,10 +1123,11 @@ function CheckForChecks() {
 function GetAllAttacksOfEnemies() {
     // Get ALL attack spaces of enemies for king movement
     
+    pieceValidKillSpritesCheckAll = []
     for (let i = 0; i < pieces.length; i++) {
         if (pieces[i][1] != whoseTurn) {
             console.log("GetAllAttacksOfEnemies-RunningKillSpaceFor:" + pieces[i][0])
-            CalculateKillSpaces(i, true, 2, true)
+            CalculateKillSpaces(i, false, 2, true)
         }
         
     }
@@ -1171,13 +1157,20 @@ function PromotionSequence(pnum: number, team: number) {
     
     UnbindAll()
     selector.setImage(assets.image`selectorPromotion`)
-    animation.runImageAnimation(pieceSprites[pnum], assets.animation`promotionBegunWhite`, 50, false)
+    if (team == 0) {
+        animation.runImageAnimation(pieceSprites[pnum], assets.animation`promotionBegunWhite`, 50, false)
+    }
+    
+    if (team == 1) {
+        animation.runImageAnimation(pieceSprites[pnum], assets.animation`promotionBegunBlack`, 50, false)
+    }
+    
     let promotionRing = sprites.create(assets.image`promotionChooser`)
     animation.runImageAnimation(promotionRing, assets.animation`promotionChooserAppear`, 100, false)
-    let promotionBishop = sprites.create(assets.image`whiteBishop`)
-    let promotionRook = sprites.create(assets.image`whiteRook`)
-    let promotionKnight = sprites.create(assets.image`whiteKnight`)
-    let promotionQueen = sprites.create(assets.image`whiteQueen`)
+    let promotionBishop = sprites.create(CalPieceSprite(2, team))
+    let promotionRook = sprites.create(CalPieceSprite(3, team))
+    let promotionKnight = sprites.create(CalPieceSprite(4, team))
+    let promotionQueen = sprites.create(CalPieceSprite(5, team))
     SetPositionOnBoard(selector, pieces[pnum][2], pieces[pnum][3])
     SetPositionOnBoard(promotionRing, pieces[pnum][2], pieces[pnum][3])
     SetPositionOnBoard(promotionBishop, pieces[pnum][2], pieces[pnum][3] + 1)
@@ -1210,7 +1203,7 @@ function PromotionSequence(pnum: number, team: number) {
     controller.A.onEvent(ControllerButtonEvent.Pressed, function SelectPromotion() {
         
         pieces[pnum][0] = chosen
-        pieceSprites[pnum].setImage(pieceAssetReference[chosen - 1])
+        pieceSprites[pnum].setImage(CalPieceSprite(chosen, team))
         promotionBishop.destroy()
         promotionRook.destroy()
         promotionKnight.destroy()
@@ -1429,6 +1422,10 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
                 promotion = true
             }
             
+            if (pieces[selectorData[2]][1] == 1 && pieces[selectorData[2]][3] == 1) {
+                promotion = true
+            }
+            
         }
         
         if (pieces[selectorData[2]][4] == 1 && !bypassCheck) {
@@ -1605,7 +1602,8 @@ function CalGamma(val: number): number {
     
 }
 
-function CalPieceSprite(pieceClass: any, team: any): Image {
+function CalPieceSprite(pieceClass: number, team: number): Image {
+    // Get the sprite according to class type and team
     
     let offset = -1
     if (team == 1) {
