@@ -16,6 +16,7 @@ pieceValidKillSpacesCheckAll: List[List[number]] = []
 
 #Normal Variables
 whoseTurn = 0
+whoseTurnInvert = 1
 pieceFound = False
 volume = 0
 turnPawn: Sprite = None
@@ -97,7 +98,7 @@ pieces = [
     [6, 1, 4, 8],
     [5, 1, 5, 8]]
 
-pieces = [[6,0,5,6],[1,1,4,2,1]]
+pieces = [[6,1,6,6],[1,0,4,6,1]]
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
     global pieceAssetReference, pieceSprites
@@ -353,7 +354,7 @@ def CalculateValidSpaces(pieceNum, draw = False): #Calculates move spaces for th
     elif pieces[pieceNum][0] == 6:
         validSpacesFound = True
         pieceValidSpaces = [[x, y + 1], [x + 1, y + 1], [x + 1, y], [x + 1, y - 1], [x, y - 1], [x - 1, y - 1], [x - 1, y], [x - 1, y + 1]]
-        GetAllAttacksOfEnemies()
+        GetAllAttacksOfEnemies(whoseTurn)
         for a in range(len(pieceValidKillSpacesCheckAll)):
             for b in range(len(pieceValidSpaces)):
                 if(pieceValidKillSpacesCheckAll[a][0] == pieceValidSpaces[b][0] and pieceValidKillSpacesCheckAll[a][1] == pieceValidSpaces[b][1]):
@@ -684,7 +685,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
         pieceValidKillSpacesForChecks = pieceValidKillSpacesChecked
         pieceValidKillSpacesChecked = []
     elif arrayType == 2:
-        pieceValidKillSpacesCheckAll = pieceValidKillSpacesChecked
+        pieceValidKillSpacesCheckAll = pieceValidKillSpacesCheckAll + pieceValidKillSpacesChecked
         pieceValidKillSpacesChecked = []
     if len(pieceValidKillSpaces) == 0:
         return False
@@ -698,8 +699,8 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             pieceValidKillSprites[i].z = 3
             if arrayType == 0: animation.run_image_animation(pieceValidKillSprites[i], assets.animation("""killSpaceAppear"""), 100, False)
     return killSpacesFound
-def CheckForChecks(): #Is the king in peril?
-    global pieces, pieceValidKillSpacesForChecks, whoseTurn, checked, pieceValidKillSpritesCheckAll
+def CheckForChecks(enemy_team): #Is the king in peril?
+    global pieces, pieceValidKillSpacesForChecks, whoseTurn, checked, pieceValidKillSpacesCheckAll
     print("CheckForChecks-Started")
     #here goes nothin!!!
     kingID = 0
@@ -709,11 +710,9 @@ def CheckForChecks(): #Is the king in peril?
         if pieces[i][0] == 6 and pieces[i][1] == whoseTurn:
             kingID = i
             print("CheckForChecks-KingFound")
-    for i in range(pieces.length):
-        if pieces[i][1] != whoseTurn:
-            CalculateKillSpaces(i, False, 1)
-    for i in range(len(pieceValidKillSpacesForChecks)):
-        if pieces[kingID][2] == pieceValidKillSpacesForChecks[i][0] and pieces[kingID][3] == pieceValidKillSpacesForChecks[i][1]:
+    GetAllAttacksOfEnemies(enemy_team)
+    for i in range(len(pieceValidKillSpacesCheckAll)):
+        if pieces[kingID][2] == pieceValidKillSpacesCheckAll[i][0] and pieces[kingID][3] == pieceValidKillSpacesCheckAll[i][1]:
             print("CheckForChecks-King" + whoseTurn + " is in peril!")
             checked = whoseTurn
             actuallyChecked = True
@@ -723,18 +722,17 @@ def CheckForChecks(): #Is the king in peril?
     else:
         checkText.x = 137
         checkText.set_text("-----")
-    print("CheckForChecks-Complete-SpotsFound-"+len(pieceValidKillSpacesForChecks))
+    print("CheckForChecks-Complete-SpotsFound-"+len(pieceValidKillSpacesCheckAll))
     print("CheckForChecks-deletedAltArray")
     print("----------------------------NEW-TURN")
     pieceValidKillSpacesForChecks = []
-def GetAllAttacksOfEnemies(): #Get ALL attack spaces of enemies for king movement
-    global pieces, pieceValidKillSpacesForChecks, whoseTurn, pieceValidKillSpritesCheckAll
-    pieceValidKillSpritesCheckAll = []
+def GetAllAttacksOfEnemies(recievingTeam): #Get ALL attack spaces of enemies for king movement
+    global pieces, pieceValidKillSpacesForChecks, whoseTurn, pieceValidKillSpacesCheckAll
+    pieceValidKillSpacesCheckAll = []
     for i in range(pieces.length):
-        if pieces[i][1] != whoseTurn:
+        if pieces[i][1] != recievingTeam:
             print("GetAllAttacksOfEnemies-RunningKillSpaceFor:"+pieces[i][0])
             CalculateKillSpaces(i, False, 2, True)
-    #pieceValidKillSpritesCheckAll = []
 def Setup(): #Initialize Commands, game is inert without them.
     global selector, turnPawn
     checkText.set_text("-----")
@@ -1022,6 +1020,7 @@ def selectorPutDownCancel():
 # ---------------------------------------------------------------------------------------- Misc/QOL Funcs
 def SwitchingSides(): #Switches the sides, self-explanatory.
     global whoseTurn
+    bufferTurn = whoseTurn
     print("----------------------SIDES-SWITCHED")
     if whoseTurn == 0:
         animation.run_image_animation(turnPawn,
@@ -1041,12 +1040,12 @@ def SwitchingSides(): #Switches the sides, self-explanatory.
             whitePawn
         """))
         whoseTurn = 0
-    CheckForChecks()
+    CheckForChecks(bufferTurn)
 def SafePause(time, mode = False): #Stops the code for a second whilst unbinding the buttons to stop exploits.
     UnbindAll()
     pause(time)
     BindAll(mode)
-def SafeAnimPause(time, mode = False): #Unbinds all buttons for set amount of time, to let animations play.
+def SafeAnimPause(time, mode = False): #Unbinds all buttons for set amount of time, to let animations play. WHILE letting the code run.
     def wait():
         UnbindAll()
         pause(time)

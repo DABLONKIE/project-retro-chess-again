@@ -15,6 +15,7 @@ let pieceValidKillSpacesForChecks : number[][] = []
 let pieceValidKillSpacesCheckAll : number[][] = []
 // Normal Variables
 let whoseTurn = 0
+let whoseTurnInvert = 1
 let pieceFound = false
 let volume = 0
 let turnPawn : Sprite = null
@@ -46,7 +47,7 @@ volume = 2
 //  2 & 3: numbers are coordinates. Letters and numbers respectively.
 //  4: special tag, for example, pawn not moved, king castlin
 pieces = [[1, 0, 1, 2, 1], [1, 0, 2, 2, 1], [1, 0, 3, 2, 1], [1, 0, 4, 2, 1], [1, 0, 5, 2, 1], [1, 0, 6, 2, 1], [1, 0, 7, 2, 1], [1, 0, 8, 2, 1], [3, 0, 1, 1], [3, 0, 8, 1], [4, 0, 2, 1], [4, 0, 7, 1], [2, 0, 3, 1], [2, 0, 6, 1], [6, 0, 4, 1], [5, 0, 5, 1], [1, 1, 1, 7, 1], [1, 1, 2, 7, 1], [1, 1, 3, 7, 1], [1, 1, 4, 7, 1], [1, 1, 5, 7, 1], [1, 1, 6, 7, 1], [1, 1, 7, 7, 1], [1, 1, 8, 7, 1], [3, 1, 1, 8], [3, 1, 8, 8], [4, 1, 2, 8], [4, 1, 7, 8], [2, 1, 3, 8], [2, 1, 6, 8], [6, 1, 4, 8], [5, 1, 5, 8]]
-pieces = [[6, 0, 5, 6], [1, 1, 4, 2, 1]]
+pieces = [[6, 1, 6, 6], [1, 0, 4, 6, 1]]
 //  ---------------------------------------------------------------------------------------- Board Funcs
 function DrawPiecesProportionally() {
     // Takes the pieces array and creates pieces accordingly.
@@ -458,7 +459,7 @@ function CalculateValidSpaces(pieceNum: number, draw: boolean = false): boolean 
         // King - 6 - nonlinear
         validSpacesFound = true
         pieceValidSpaces = [[x, y + 1], [x + 1, y + 1], [x + 1, y], [x + 1, y - 1], [x, y - 1], [x - 1, y - 1], [x - 1, y], [x - 1, y + 1]]
-        GetAllAttacksOfEnemies()
+        GetAllAttacksOfEnemies(whoseTurn)
         for (a = 0; a < pieceValidKillSpacesCheckAll.length; a++) {
             for (b = 0; b < pieceValidSpaces.length; b++) {
                 if (pieceValidKillSpacesCheckAll[a][0] == pieceValidSpaces[b][0] && pieceValidKillSpacesCheckAll[a][1] == pieceValidSpaces[b][1]) {
@@ -1051,7 +1052,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         pieceValidKillSpacesForChecks = pieceValidKillSpacesChecked
         pieceValidKillSpacesChecked = []
     } else if (arrayType == 2) {
-        pieceValidKillSpacesCheckAll = pieceValidKillSpacesChecked
+        pieceValidKillSpacesCheckAll = pieceValidKillSpacesCheckAll.concat(pieceValidKillSpacesChecked)
         pieceValidKillSpacesChecked = []
     }
     
@@ -1076,7 +1077,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
     return killSpacesFound
 }
 
-function CheckForChecks() {
+function CheckForChecks(enemy_team: number) {
     let i: number;
     // Is the king in peril?
     
@@ -1092,14 +1093,9 @@ function CheckForChecks() {
         }
         
     }
-    for (i = 0; i < pieces.length; i++) {
-        if (pieces[i][1] != whoseTurn) {
-            CalculateKillSpaces(i, false, 1)
-        }
-        
-    }
-    for (i = 0; i < pieceValidKillSpacesForChecks.length; i++) {
-        if (pieces[kingID][2] == pieceValidKillSpacesForChecks[i][0] && pieces[kingID][3] == pieceValidKillSpacesForChecks[i][1]) {
+    GetAllAttacksOfEnemies(enemy_team)
+    for (i = 0; i < pieceValidKillSpacesCheckAll.length; i++) {
+        if (pieces[kingID][2] == pieceValidKillSpacesCheckAll[i][0] && pieces[kingID][3] == pieceValidKillSpacesCheckAll[i][1]) {
             console.log("CheckForChecks-King" + whoseTurn + " is in peril!")
             checked = whoseTurn
             actuallyChecked = true
@@ -1114,18 +1110,18 @@ function CheckForChecks() {
         checkText.setText("-----")
     }
     
-    console.log("CheckForChecks-Complete-SpotsFound-" + pieceValidKillSpacesForChecks.length)
+    console.log("CheckForChecks-Complete-SpotsFound-" + pieceValidKillSpacesCheckAll.length)
     console.log("CheckForChecks-deletedAltArray")
     console.log("----------------------------NEW-TURN")
     pieceValidKillSpacesForChecks = []
 }
 
-function GetAllAttacksOfEnemies() {
+function GetAllAttacksOfEnemies(recievingTeam: number) {
     // Get ALL attack spaces of enemies for king movement
     
-    pieceValidKillSpritesCheckAll = []
+    pieceValidKillSpacesCheckAll = []
     for (let i = 0; i < pieces.length; i++) {
-        if (pieces[i][1] != whoseTurn) {
+        if (pieces[i][1] != recievingTeam) {
             console.log("GetAllAttacksOfEnemies-RunningKillSpaceFor:" + pieces[i][0])
             CalculateKillSpaces(i, false, 2, true)
         }
@@ -1133,7 +1129,6 @@ function GetAllAttacksOfEnemies() {
     }
 }
 
-// pieceValidKillSpritesCheckAll = []
 function Setup() {
     // Initialize Commands, game is inert without them.
     
@@ -1495,6 +1490,7 @@ function selectorPutDownCancel() {
 function SwitchingSides() {
     // Switches the sides, self-explanatory.
     
+    let bufferTurn = whoseTurn
     console.log("----------------------SIDES-SWITCHED")
     if (whoseTurn == 0) {
         animation.runImageAnimation(turnPawn, assets.animation`whiteTurnBlack`, 80, false)
@@ -1510,7 +1506,7 @@ function SwitchingSides() {
         whoseTurn = 0
     }
     
-    CheckForChecks()
+    CheckForChecks(bufferTurn)
 }
 
 function SafePause(time: number, mode: boolean = false) {
@@ -1521,7 +1517,7 @@ function SafePause(time: number, mode: boolean = false) {
 }
 
 function SafeAnimPause(time: number, mode: boolean = false) {
-    // Unbinds all buttons for set amount of time, to let animations play.
+    // Unbinds all buttons for set amount of time, to let animations play. WHILE letting the code run.
     timer.background(function wait() {
         UnbindAll()
         pause(time)
