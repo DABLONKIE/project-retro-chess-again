@@ -10,8 +10,9 @@ let selectorData : number[] = []
 // 0,1=x,y 2=piece index 3,4 = original x,y
 let pieces : number[][] = []
 let pieceValidSpaces : number[][] = []
+let pieceValidSpacesCheckMate : number[][] = []
 let pieceValidKillSpaces : number[][] = []
-let pieceValidKillSpacesForChecks : number[][] = []
+let pieceValidKillSpacesCheckMate : number[][] = []
 let pieceValidKillSpacesCheckAll : number[][] = []
 // Normal Variables
 let whoseTurn = 0
@@ -20,6 +21,7 @@ let pieceFound = false
 let volume = 0
 let turnPawn : Sprite = null
 let selector : Sprite = null
+let checkMateBar : Sprite = null
 let tempSpriteNum = 0
 let checkText = textsprite.create("     ")
 checkText.x = 137
@@ -47,7 +49,7 @@ volume = 2
 //  2 & 3: numbers are coordinates. Letters and numbers respectively.
 //  4: special tag, for example, pawn not moved, king castlin
 pieces = [[1, 0, 1, 2, 1], [1, 0, 2, 2, 1], [1, 0, 3, 2, 1], [1, 0, 4, 2, 1], [1, 0, 5, 2, 1], [1, 0, 6, 2, 1], [1, 0, 7, 2, 1], [1, 0, 8, 2, 1], [3, 0, 1, 1], [3, 0, 8, 1], [4, 0, 2, 1], [4, 0, 7, 1], [2, 0, 3, 1], [2, 0, 6, 1], [6, 0, 4, 1], [5, 0, 5, 1], [1, 1, 1, 7, 1], [1, 1, 2, 7, 1], [1, 1, 3, 7, 1], [1, 1, 4, 7, 1], [1, 1, 5, 7, 1], [1, 1, 6, 7, 1], [1, 1, 7, 7, 1], [1, 1, 8, 7, 1], [3, 1, 1, 8], [3, 1, 8, 8], [4, 1, 2, 8], [4, 1, 7, 8], [2, 1, 3, 8], [2, 1, 6, 8], [6, 1, 4, 8], [5, 1, 5, 8]]
-pieces = [[6, 1, 6, 6], [1, 0, 4, 6, 1]]
+pieces = [[6, 0, 6, 6], [5, 1, 4, 6, 1], [5, 1, 3, 6, 1]]
 //  ---------------------------------------------------------------------------------------- Board Funcs
 function DrawPiecesProportionally() {
     // Takes the pieces array and creates pieces accordingly.
@@ -75,7 +77,7 @@ function SetPositionOnBoard(sprite: Sprite, toX: number, toY: number, selected: 
     return [goX, goY]
 }
 
-function CalculateValidSpaces(pieceNum: number, draw: boolean = false): boolean {
+function CalculateValidSpaces(pieceNum: number, draw: boolean = false, arrayType: number = 0): boolean {
     let i: number;
     let OccupiedSpace: boolean;
     let g: number;
@@ -511,7 +513,7 @@ function CalculateValidSpaces(pieceNum: number, draw: boolean = false): boolean 
     return validSpacesFound
 }
 
-function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType: number = 0, bypassCheck: boolean = false): boolean {
+function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType: number = 0, bypassCheck: boolean = false, forCheck: boolean = false): boolean {
     let noSpaceNum: number;
     let i: number;
     let OccupiedSpace: boolean;
@@ -1049,7 +1051,6 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         pieceValidKillSpaces = pieceValidKillSpacesChecked
         pieceValidKillSpacesChecked = []
     } else if (arrayType == 1) {
-        pieceValidKillSpacesForChecks = pieceValidKillSpacesChecked
         pieceValidKillSpacesChecked = []
     } else if (arrayType == 2) {
         pieceValidKillSpacesCheckAll = pieceValidKillSpacesCheckAll.concat(pieceValidKillSpacesChecked)
@@ -1086,6 +1087,7 @@ function CheckForChecks() {
     let kingID = 0
     let actuallyChecked = false
     console.log("CheckForChecks-ally:" + whoseTurn)
+    console.log("CheckForChecks-foe:" + whoseTurnInvert)
     for (i = 0; i < pieces.length; i++) {
         if (pieces[i][0] == 6 && pieces[i][1] == whoseTurn) {
             kingID = i
@@ -1107,6 +1109,10 @@ function CheckForChecks() {
     if (actuallyChecked) {
         checkText.x = 136
         checkText.setText("CHECK")
+        if (!CanKingMove()) {
+            checkText2.setText("MATE")
+        }
+        
     } else {
         checkText.x = 137
         checkText.setText("-----")
@@ -1130,13 +1136,34 @@ function GetAllAttacksOfEnemies(recievingTeam: number) {
     }
 }
 
+function CanKingMove(): boolean {
+    // Returns a TRUE or FALSE depending if the king has valid moves/kills.
+    
+    let kingID = 0
+    for (let i = 0; i < pieces.length; i++) {
+        if (pieces[i][0] == 6 && pieces[i][1] == whoseTurn) {
+            kingID = i
+        }
+        
+    }
+    if (CalculateValidSpaces(kingID, false, 1) || CalculateKillSpaces(kingID, false, 1)) {
+        return true
+    } else {
+        return false
+    }
+    
+}
+
 function Setup() {
     // Initialize Commands, game is inert without them.
     
-    checkText.setText("-----")
-    checkText2.setText("-----")
+    // checkText.set_text("-----")
+    // checkText2.set_text("-----")
     selector = sprites.create(assets.image`selector`, 0)
     turnPawn = sprites.create(assets.image`whitePawn`, 0)
+    let checkMateBar = sprites.create(assets.image`checkMateBar`, 0)
+    checkMateBar.x = 137
+    checkMateBar.y = 47
     selector.z = 4
     DrawPiecesProportionally()
     SetPositionOnBoard(selector, selectorData[0], selectorData[1])
@@ -1173,13 +1200,8 @@ function PromotionSequence(pnum: number, team: number) {
     SetPositionOnBoard(promotionRook, pieces[pnum][2], pieces[pnum][3] - 1)
     SetPositionOnBoard(promotionKnight, pieces[pnum][2] - 1, pieces[pnum][3])
     SetPositionOnBoard(promotionQueen, pieces[pnum][2] + 1, pieces[pnum][3])
-    function GoRightQueen() {
-        
-        chosen = 5
-        SetPositionOnBoard(selector, pieces[pnum][2] + 1, pieces[pnum][3])
-    }
-    
-    GoRightQueen()
+    let chosen = 0
+    SafePause(350)
     controller.up.onEvent(ControllerButtonEvent.Pressed, function GoUpBishop() {
         
         chosen = 2
@@ -1195,8 +1217,16 @@ function PromotionSequence(pnum: number, team: number) {
         chosen = 4
         SetPositionOnBoard(selector, pieces[pnum][2] - 1, pieces[pnum][3])
     })
-    controller.right.onEvent(ControllerButtonEvent.Pressed, GoRightQueen)
+    controller.right.onEvent(ControllerButtonEvent.Pressed, function GoRightQueen() {
+        
+        chosen = 5
+        SetPositionOnBoard(selector, pieces[pnum][2] + 1, pieces[pnum][3])
+    })
     controller.A.onEvent(ControllerButtonEvent.Pressed, function SelectPromotion() {
+        
+        if (chosen == 0) {
+            return null
+        }
         
         pieces[pnum][0] = chosen
         pieceSprites[pnum].setImage(CalPieceSprite(chosen, team))
@@ -1208,6 +1238,7 @@ function PromotionSequence(pnum: number, team: number) {
         selector.setImage(assets.image`selector`)
         SetPositionOnBoard(selector, pieces[pnum][2], pieces[pnum][3])
         CreateTempSprite(700, assets.animation`promotionChosen`, pieces[pnum][2], pieces[pnum][3], 100, 0, 0, 2, true)
+        SafeAnimPause(700)
         BindAll()
         CheckForChecks()
     })
@@ -1503,12 +1534,14 @@ function SwitchingSides() {
         turnPawn.setImage(assets.image`
             blackPawn
         `)
+        whoseTurnInvert = 0
         whoseTurn = 1
     } else {
         animation.runImageAnimation(turnPawn, assets.animation`blackTurnWhite`, 50, false)
         turnPawn.setImage(assets.image`
             whitePawn
         `)
+        whoseTurnInvert = 1
         whoseTurn = 0
     }
     

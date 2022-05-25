@@ -10,8 +10,9 @@ tempSprites: List[Sprite] = []
 selectorData: List[number] = [] #0,1=x,y 2=piece index 3,4 = original x,y
 pieces: List[List[number]] = []
 pieceValidSpaces: List[List[number]] = []
+pieceValidSpacesCheckMate: List[List[number]] = []
 pieceValidKillSpaces: List[List[number]] = []
-pieceValidKillSpacesForChecks: List[List[number]] = []
+pieceValidKillSpacesCheckMate: List[List[number]] = []
 pieceValidKillSpacesCheckAll: List[List[number]] = []
 
 #Normal Variables
@@ -21,6 +22,7 @@ pieceFound = False
 volume = 0
 turnPawn: Sprite = None
 selector: Sprite = None
+checkMateBar: Sprite = None
 tempSpriteNum = 0
 checkText = textsprite.create("     ")
 checkText.x = 137
@@ -63,7 +65,6 @@ volume = 2
 # 1: 0=white 1=black
 # 2 & 3: numbers are coordinates. Letters and numbers respectively.
 # 4: special tag, for example, pawn not moved, king castlin
-
 pieces = [
     [1, 0, 1, 2, 1],
     [1, 0, 2, 2, 1],
@@ -98,7 +99,7 @@ pieces = [
     [6, 1, 4, 8],
     [5, 1, 5, 8]]
 
-pieces = [[6,1,6,6],[1,0,4,6,1]]
+pieces = [[6,0,6,6],[5,1,4,6,1],[5,1,3,6,1]]
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
     global pieceAssetReference, pieceSprites
@@ -114,8 +115,8 @@ def SetPositionOnBoard(sprite: Sprite, toX, toY, selected = False, OffX = 0, Off
         goY -= 10
     if not sprite == None: sprite.set_position(goX, goY)
     return goX, goY
-def CalculateValidSpaces(pieceNum, draw = False): #Calculates move spaces for the specified piece.
-    global pieceValidSpaces, pieceValidSprites, pawnFirstMove, pieces, whoseTurn, pieceValidKillSpacesForChecks, pieceValidKillSpacesCheckAll
+def CalculateValidSpaces(pieceNum, draw = False, arrayType = 0): #Calculates move spaces for the specified piece.
+    global pieceValidSpaces, pieceValidSprites, pawnFirstMove, pieces, whoseTurn
     validSpacesFound = False
     noSpaces = False
     x = pieces[pieceNum][2]
@@ -374,6 +375,8 @@ def CalculateValidSpaces(pieceNum, draw = False): #Calculates move spaces for th
     
     if noSpaces or len(pieceValidSpaces) == 0: #Check 2
         return False
+
+    
     # Drawing starts HERE-----
     if not draw:
         return validSpacesFound
@@ -389,8 +392,8 @@ def CalculateValidSpaces(pieceNum, draw = False): #Calculates move spaces for th
         pieceValidSprites[i].z = -1
         animation.run_image_animation(pieceValidSprites[i], assets.animation("""validAnim"""), 400, True)
     return validSpacesFound
-def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = False): #Calculates the available kills for the specified piece.
-    global pieces, pieceValidKillSpaces, pieceValidKillSprites, whoseTurn, pieceValidKillSpacesForChecks, pieceValidKillSpacesCheckAll,killSpaceAssetRefernce
+def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = False, forCheck = False): #Calculates the available kills for the specified piece.
+    global pieces, pieceValidKillSpaces, pieceValidKillSprites, whoseTurn, pieceValidKillSpacesCheckMate, pieceValidKillSpacesCheckAll,killSpaceAssetRefernce
     if arrayType != 0:
         print("CalculateKillSpaces-arrayType-"+arrayType)
     #eliminar
@@ -682,7 +685,6 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
         pieceValidKillSpaces = pieceValidKillSpacesChecked
         pieceValidKillSpacesChecked = []
     elif arrayType == 1:
-        pieceValidKillSpacesForChecks = pieceValidKillSpacesChecked
         pieceValidKillSpacesChecked = []
     elif arrayType == 2:
         pieceValidKillSpacesCheckAll = pieceValidKillSpacesCheckAll + pieceValidKillSpacesChecked
@@ -700,12 +702,13 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             if arrayType == 0: animation.run_image_animation(pieceValidKillSprites[i], assets.animation("""killSpaceAppear"""), 100, False)
     return killSpacesFound
 def CheckForChecks(): #Is the king in peril?
-    global pieces, whoseTurn, checked, pieceValidKillSpacesCheckAll
+    global pieces, whoseTurn, whoseTurnInvert, checked, pieceValidKillSpacesCheckAll
     print("CheckForChecks-Started")
     #here goes nothin!!!
     kingID = 0
     actuallyChecked = False
     print("CheckForChecks-ally:"+whoseTurn)
+    print("CheckForChecks-foe:"+whoseTurnInvert)
     for i in range(pieces.length):
         if pieces[i][0] == 6 and pieces[i][1] == whoseTurn:
             kingID = i
@@ -721,6 +724,8 @@ def CheckForChecks(): #Is the king in peril?
     if actuallyChecked:
         checkText.x = 136
         checkText.set_text("CHECK")
+        if not CanKingMove():
+            checkText2.set_text("MATE")
     else:
         checkText.x = 137
         checkText.set_text("-----")
@@ -728,18 +733,31 @@ def CheckForChecks(): #Is the king in peril?
     print("CheckForChecks-deletedAltArray")
     print("----------------------------NEW-TURN")
 def GetAllAttacksOfEnemies(recievingTeam): #Get ALL attack spaces of enemies for king movement
-    global pieces, pieceValidKillSpacesForChecks, whoseTurn, pieceValidKillSpacesCheckAll
+    global pieces, whoseTurn, pieceValidKillSpacesCheckAll
     pieceValidKillSpacesCheckAll = []
     for i in range(pieces.length):
         if pieces[i][1] != recievingTeam:
             print("GetAllAttacksOfEnemies-RunningKillSpaceFor:"+pieces[i][0])
             CalculateKillSpaces(i, False, 2, True)
+def CanKingMove(): #Returns a TRUE or FALSE depending if the king has valid moves/kills.
+    global pieces, whoseTurn, whoseTurnInvert
+    kingID = 0
+    for i in range(pieces.length):
+        if pieces[i][0] == 6 and pieces[i][1] == whoseTurn:
+            kingID = i
+    if CalculateValidSpaces(kingID, False, 1) or CalculateKillSpaces(kingID, False, 1):
+        return True
+    else:
+        return False
 def Setup(): #Initialize Commands, game is inert without them.
     global selector, turnPawn
-    checkText.set_text("-----")
-    checkText2.set_text("-----")
+    #checkText.set_text("-----")
+    #checkText2.set_text("-----")
     selector = sprites.create(assets.image("""selector"""), 0)
     turnPawn = sprites.create(assets.image("""whitePawn"""), 0)
+    checkMateBar  = sprites.create(assets.image("""checkMateBar"""), 0)
+    checkMateBar.x = 137
+    checkMateBar.y = 47
     selector.z = 4
 
     DrawPiecesProportionally()
@@ -769,6 +787,8 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
     SetPositionOnBoard(promotionRook, pieces[pnum][2], pieces[pnum][3] - 1)
     SetPositionOnBoard(promotionKnight, pieces[pnum][2] - 1, pieces[pnum][3])
     SetPositionOnBoard(promotionQueen, pieces[pnum][2] + 1, pieces[pnum][3])
+    chosen = 0
+    SafePause(350)
     def GoUpBishop():
         global chosen
         chosen = 2
@@ -787,6 +807,8 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
         SetPositionOnBoard(selector, pieces[pnum][2] + 1, pieces[pnum][3])
     def SelectPromotion():
         global chosen,whoseTurn
+        if chosen == 0:
+            return None
         pieces[pnum][0] = chosen
         pieceSprites[pnum].set_image(CalPieceSprite(chosen, team))
         promotionBishop.destroy()
@@ -797,9 +819,9 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
         selector.set_image(assets.image("""selector"""))
         SetPositionOnBoard(selector, pieces[pnum][2],pieces[pnum][3])
         CreateTempSprite(700,assets.animation("""promotionChosen"""),pieces[pnum][2],pieces[pnum][3],100, 0, 0, 2, True)
+        SafeAnimPause(700)
         BindAll()
         CheckForChecks()
-    GoRightQueen()
     controller.up.on_event(ControllerButtonEvent.PRESSED, GoUpBishop)
     controller.down.on_event(ControllerButtonEvent.PRESSED, GoDownRook)
     controller.left.on_event(ControllerButtonEvent.PRESSED, GoLeftKnight)
@@ -1023,7 +1045,7 @@ def selectorPutDownCancel():
     #CancelSoundEffect()
 # ---------------------------------------------------------------------------------------- Misc/QOL Funcs
 def SwitchingSides(): #Switches the sides, self-explanatory.
-    global whoseTurn
+    global whoseTurn,whoseTurnInvert
     bufferTurn = whoseTurn
     print("----------------------SIDES-SWITCHED")
     if whoseTurn == 0:
@@ -1034,6 +1056,7 @@ def SwitchingSides(): #Switches the sides, self-explanatory.
         turnPawn.set_image(assets.image("""
             blackPawn
         """))
+        whoseTurnInvert = 0
         whoseTurn = 1
     else:
         animation.run_image_animation(turnPawn,
@@ -1043,8 +1066,8 @@ def SwitchingSides(): #Switches the sides, self-explanatory.
         turnPawn.set_image(assets.image("""
             whitePawn
         """))
+        whoseTurnInvert = 1
         whoseTurn = 0
-    
 def SafePause(time, mode = False): #Stops the code for a second whilst unbinding the buttons to stop exploits.
     UnbindAll()
     pause(time)
