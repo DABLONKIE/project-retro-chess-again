@@ -1077,7 +1077,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
     return killSpacesFound
 }
 
-function CheckForChecks(enemy_team: number) {
+function CheckForChecks() {
     let i: number;
     // Is the king in peril?
     
@@ -1085,7 +1085,7 @@ function CheckForChecks(enemy_team: number) {
     // here goes nothin!!!
     let kingID = 0
     let actuallyChecked = false
-    console.log("CheckForChecks-turn:" + whoseTurn)
+    console.log("CheckForChecks-ally:" + whoseTurn)
     for (i = 0; i < pieces.length; i++) {
         if (pieces[i][0] == 6 && pieces[i][1] == whoseTurn) {
             kingID = i
@@ -1093,8 +1093,10 @@ function CheckForChecks(enemy_team: number) {
         }
         
     }
-    GetAllAttacksOfEnemies(enemy_team)
+    GetAllAttacksOfEnemies(whoseTurn)
     for (i = 0; i < pieceValidKillSpacesCheckAll.length; i++) {
+        console.log("CheckForChecks-Running X " + pieceValidKillSpacesCheckAll[i][0])
+        console.log("CheckForChecks-Running Y " + pieceValidKillSpacesCheckAll[i][1])
         if (pieces[kingID][2] == pieceValidKillSpacesCheckAll[i][0] && pieces[kingID][3] == pieceValidKillSpacesCheckAll[i][1]) {
             console.log("CheckForChecks-King" + whoseTurn + " is in peril!")
             checked = whoseTurn
@@ -1113,7 +1115,6 @@ function CheckForChecks(enemy_team: number) {
     console.log("CheckForChecks-Complete-SpotsFound-" + pieceValidKillSpacesCheckAll.length)
     console.log("CheckForChecks-deletedAltArray")
     console.log("----------------------------NEW-TURN")
-    pieceValidKillSpacesForChecks = []
 }
 
 function GetAllAttacksOfEnemies(recievingTeam: number) {
@@ -1208,6 +1209,7 @@ function PromotionSequence(pnum: number, team: number) {
         SetPositionOnBoard(selector, pieces[pnum][2], pieces[pnum][3])
         CreateTempSprite(700, assets.animation`promotionChosen`, pieces[pnum][2], pieces[pnum][3], 100, 0, 0, 2, true)
         BindAll()
+        CheckForChecks()
     })
 }
 
@@ -1470,6 +1472,10 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         pieceValidKillSpaces = []
         pieceValidKillSprites = []
         placeFound = false
+        if (!bypassCheck) {
+            CheckForChecks()
+        }
+        
     }
     
 }
@@ -1506,7 +1512,6 @@ function SwitchingSides() {
         whoseTurn = 0
     }
     
-    CheckForChecks(bufferTurn)
 }
 
 function SafePause(time: number, mode: boolean = false) {

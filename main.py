@@ -699,19 +699,21 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             pieceValidKillSprites[i].z = 3
             if arrayType == 0: animation.run_image_animation(pieceValidKillSprites[i], assets.animation("""killSpaceAppear"""), 100, False)
     return killSpacesFound
-def CheckForChecks(enemy_team): #Is the king in peril?
-    global pieces, pieceValidKillSpacesForChecks, whoseTurn, checked, pieceValidKillSpacesCheckAll
+def CheckForChecks(): #Is the king in peril?
+    global pieces, whoseTurn, checked, pieceValidKillSpacesCheckAll
     print("CheckForChecks-Started")
     #here goes nothin!!!
     kingID = 0
     actuallyChecked = False
-    print("CheckForChecks-turn:"+whoseTurn)
+    print("CheckForChecks-ally:"+whoseTurn)
     for i in range(pieces.length):
         if pieces[i][0] == 6 and pieces[i][1] == whoseTurn:
             kingID = i
             print("CheckForChecks-KingFound")
-    GetAllAttacksOfEnemies(enemy_team)
+    GetAllAttacksOfEnemies(whoseTurn)
     for i in range(len(pieceValidKillSpacesCheckAll)):
+        print("CheckForChecks-Running X "+pieceValidKillSpacesCheckAll[i][0])
+        print("CheckForChecks-Running Y "+pieceValidKillSpacesCheckAll[i][1])
         if pieces[kingID][2] == pieceValidKillSpacesCheckAll[i][0] and pieces[kingID][3] == pieceValidKillSpacesCheckAll[i][1]:
             print("CheckForChecks-King" + whoseTurn + " is in peril!")
             checked = whoseTurn
@@ -725,7 +727,6 @@ def CheckForChecks(enemy_team): #Is the king in peril?
     print("CheckForChecks-Complete-SpotsFound-"+len(pieceValidKillSpacesCheckAll))
     print("CheckForChecks-deletedAltArray")
     print("----------------------------NEW-TURN")
-    pieceValidKillSpacesForChecks = []
 def GetAllAttacksOfEnemies(recievingTeam): #Get ALL attack spaces of enemies for king movement
     global pieces, pieceValidKillSpacesForChecks, whoseTurn, pieceValidKillSpacesCheckAll
     pieceValidKillSpacesCheckAll = []
@@ -785,7 +786,7 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
         chosen = 5
         SetPositionOnBoard(selector, pieces[pnum][2] + 1, pieces[pnum][3])
     def SelectPromotion():
-        global chosen
+        global chosen,whoseTurn
         pieces[pnum][0] = chosen
         pieceSprites[pnum].set_image(CalPieceSprite(chosen, team))
         promotionBishop.destroy()
@@ -797,6 +798,7 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
         SetPositionOnBoard(selector, pieces[pnum][2],pieces[pnum][3])
         CreateTempSprite(700,assets.animation("""promotionChosen"""),pieces[pnum][2],pieces[pnum][3],100, 0, 0, 2, True)
         BindAll()
+        CheckForChecks()
     GoRightQueen()
     controller.up.on_event(ControllerButtonEvent.PRESSED, GoUpBishop)
     controller.down.on_event(ControllerButtonEvent.PRESSED, GoDownRook)
@@ -1004,6 +1006,8 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
         pieceValidKillSpaces = []
         pieceValidKillSprites = []
         placeFound = False
+        if not bypassCheck:
+            CheckForChecks()
 def selectorPutDownCancel():
     global pieceFound, selectorData, pawnFirstMove
     selectorData[0] = selectorData[3]
@@ -1040,7 +1044,7 @@ def SwitchingSides(): #Switches the sides, self-explanatory.
             whitePawn
         """))
         whoseTurn = 0
-    CheckForChecks(bufferTurn)
+    
 def SafePause(time, mode = False): #Stops the code for a second whilst unbinding the buttons to stop exploits.
     UnbindAll()
     pause(time)
