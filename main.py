@@ -358,7 +358,7 @@ def CalculateValidSpaces(pieceNum, draw = False): #Calculates move spaces for th
         for a in range(len(pieceValidKillSpacesCheckAll)):
             for b in range(len(pieceValidSpaces)):
                 if(pieceValidKillSpacesCheckAll[a][0] == pieceValidSpaces[b][0] and pieceValidKillSpacesCheckAll[a][1] == pieceValidSpaces[b][1]):
-                    if draw: CreateTempSprite(750, assets.animation("""invalidSpaceAnim"""), pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 50, 0, 0, 10, True)
+                    if draw: CreateTempSprite(750, assets.animation("""invalidSpaceAnim"""), pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 40, 0, 0, 10, True)
                     pieceValidSpaces.remove_at(b)
     # Checking for invalid spaces (nonlinear = base check, linear = failsafe )
     piecesToCheck = len(pieces)

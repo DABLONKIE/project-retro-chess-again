@@ -464,7 +464,7 @@ function CalculateValidSpaces(pieceNum: number, draw: boolean = false): boolean 
             for (b = 0; b < pieceValidSpaces.length; b++) {
                 if (pieceValidKillSpacesCheckAll[a][0] == pieceValidSpaces[b][0] && pieceValidKillSpacesCheckAll[a][1] == pieceValidSpaces[b][1]) {
                     if (draw) {
-                        CreateTempSprite(750, assets.animation`invalidSpaceAnim`, pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 50, 0, 0, 10, true)
+                        CreateTempSprite(750, assets.animation`invalidSpaceAnim`, pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 40, 0, 0, 10, true)
                     }
                     
                     pieceValidSpaces.removeAt(b)
