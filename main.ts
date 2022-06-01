@@ -31,6 +31,7 @@ turnPawn = null
 let colorPalletteSwitched = true
 let gamma = 0
 let chosen = 0
+let check = 0
 UpdateColors()
 let checked = 2
 // 0 = white | 1 = black | 2 = none
@@ -1101,13 +1102,15 @@ function CheckForChecks() {
         
     }
     if (actuallyChecked) {
+        check = 1
         animation.runImageAnimation(checkmateBar, assets.animation`checkmateBarCheck`, 50, false)
         if (!CanKingMove()) {
+            check = 2
             animation.runImageAnimation(checkmateBar, assets.animation`checkmateBarCheckmate`, 50, false)
         }
         
-    } else {
-        
+    } else if (check == 1) {
+        animation.runImageAnimation(checkmateBar, assets.animation`checkmateBarDecheck`, 50, false)
     }
     
     console.log("CheckForChecks-Complete-SpotsFound-" + pieceValidKillSpacesCheckAll.length)
@@ -1312,6 +1315,7 @@ function selectorPickUp() {
     let tempMemory: number;
     
     let somethingFound = false
+    UnbindAll()
     for (let i = 0; i < pieces.length; i++) {
         if (pieces[i][2] == selectorData[0] && pieces[i][3] == selectorData[1]) {
             pieceFound = true
@@ -1351,6 +1355,7 @@ function selectorPickUp() {
             CalculateValidSpaces(selectorData[2], true)
             CalculateKillSpaces(selectorData[2], true)
             pieceFound = false
+            BindAll(true)
         } else if (CalculateKillSpaces(selectorData[2])) {
             console.log("PickUp-moves failed, kills valid")
             animation.runImageAnimation(selector, assets.animation`selectorPickupAnim`, 30, false)
@@ -1378,9 +1383,10 @@ function selectorPickUp() {
         selectorData[2] = null
     }
     
+    // DenySoundEffect()
+    BindAll(false)
 }
 
-// DenySoundEffect()
 function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = false, noAnim: boolean = false) {
     let i: number;
     let teamBuffer: number;
@@ -1388,6 +1394,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
     let tempMemory: number;
     
     let killingPlace = false
+    UnbindAll()
     for (i = 0; i < pieceValidSpaces.length; i++) {
         if (selectorData[0] == pieceValidSpaces[i][0] && selectorData[1] == pieceValidSpaces[i][1]) {
             placeFound = true
@@ -1499,6 +1506,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         
     }
     
+    BindAll(false)
 }
 
 function selectorPutDownCancel() {

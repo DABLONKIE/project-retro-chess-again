@@ -32,6 +32,7 @@ turnPawn = None
 colorPalletteSwitched = True
 gamma = 0
 chosen = 0
+check = 0
 UpdateColors()
 checked = 2 #0 = white | 1 = black | 2 = none
 pieceAssetReference = [
@@ -696,7 +697,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             if arrayType == 0: animation.run_image_animation(pieceValidKillSprites[i], assets.animation("""killSpaceAppear"""), 100, False)
     return killSpacesFound
 def CheckForChecks(): #Is the king in peril?
-    global pieces, whoseTurn, whoseTurnInvert, checked, pieceValidKillSpacesCheckAll, checkmateBar
+    global pieces, whoseTurn, whoseTurnInvert, checked, pieceValidKillSpacesCheckAll, checkmateBar, check
     print("CheckForChecks-Started")
     #here goes nothin!!!
     kingID = 0
@@ -716,11 +717,13 @@ def CheckForChecks(): #Is the king in peril?
             checked = whoseTurn
             actuallyChecked = True
     if actuallyChecked:
+        check = 1
         animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarCheck"""), 50, False)
         if not CanKingMove():
+            check = 2
             animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarCheckmate"""), 50, False)
     else:
-        pass
+        if check == 1: animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarDecheck"""), 50, False)
     print("CheckForChecks-Complete-SpotsFound-"+len(pieceValidKillSpacesCheckAll))
     print("CheckForChecks-deletedAltArray")
     print("----------------------------NEW-TURN")
@@ -876,6 +879,7 @@ def SelectorGoDOWN():
 def selectorPickUp():
     global pieceFound, whoseTurn
     somethingFound = False
+    UnbindAll()
     for i in range(len(pieces)):
         if pieces[i][2] == selectorData[0] and pieces[i][3] == selectorData[1]:
             pieceFound = True
@@ -913,6 +917,7 @@ def selectorPickUp():
             CalculateValidSpaces(selectorData[2],True)
             CalculateKillSpaces(selectorData[2],True)
             pieceFound = False
+            BindAll(True)
         elif CalculateKillSpaces(selectorData[2]):
             print("PickUp-moves failed, kills valid")
             animation.run_image_animation(selector,assets.animation("""selectorPickupAnim"""), 30, False)
@@ -938,9 +943,11 @@ def selectorPickUp():
         pieceFound = False
         selectorData[2] = None
         #DenySoundEffect()
+    BindAll(False)
 def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
     global placeFound, pieceValidSprites, pieceValidSpaces, pieceValidKillSprites, pieceValidKillSpaces, pieces, pawnFirstMove
     killingPlace = False
+    UnbindAll()
     for i in range(len(pieceValidSpaces)):
         if selectorData[0] == pieceValidSpaces[i][0] and selectorData[1] == pieceValidSpaces[i][1]:
             placeFound = True
@@ -1020,6 +1027,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
         placeFound = False
         if not bypassCheck:
             CheckForChecks()
+    BindAll(False)
 def selectorPutDownCancel():
     global pieceFound, selectorData, pawnFirstMove
     selectorData[0] = selectorData[3]
