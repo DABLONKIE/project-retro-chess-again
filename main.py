@@ -22,14 +22,8 @@ pieceFound = False
 volume = 0
 turnPawn: Sprite = None
 selector: Sprite = None
-checkMateBar: Sprite = None
+checkmateBar: Sprite = None
 tempSpriteNum = 0
-checkText = textsprite.create("     ")
-checkText.x = 137
-checkText.y = 35
-checkText2 = textsprite.create("     ")
-checkText2.x = 137
-checkText2.y = 45
 placeFound = False
 selectorData = [4, 4, None]
 pawnFirstMove = False
@@ -702,7 +696,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             if arrayType == 0: animation.run_image_animation(pieceValidKillSprites[i], assets.animation("""killSpaceAppear"""), 100, False)
     return killSpacesFound
 def CheckForChecks(): #Is the king in peril?
-    global pieces, whoseTurn, whoseTurnInvert, checked, pieceValidKillSpacesCheckAll
+    global pieces, whoseTurn, whoseTurnInvert, checked, pieceValidKillSpacesCheckAll, checkmateBar
     print("CheckForChecks-Started")
     #here goes nothin!!!
     kingID = 0
@@ -722,13 +716,11 @@ def CheckForChecks(): #Is the king in peril?
             checked = whoseTurn
             actuallyChecked = True
     if actuallyChecked:
-        checkText.x = 136
-        checkText.set_text("CHECK")
+        animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarCheck"""), 50, False)
         if not CanKingMove():
-            checkText2.set_text("MATE")
+            animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarCheckmate"""), 50, False)
     else:
-        checkText.x = 137
-        checkText.set_text("-----")
+        pass
     print("CheckForChecks-Complete-SpotsFound-"+len(pieceValidKillSpacesCheckAll))
     print("CheckForChecks-deletedAltArray")
     print("----------------------------NEW-TURN")
@@ -750,14 +742,12 @@ def CanKingMove(): #Returns a TRUE or FALSE depending if the king has valid move
     else:
         return False
 def Setup(): #Initialize Commands, game is inert without them.
-    global selector, turnPawn
-    #checkText.set_text("-----")
-    #checkText2.set_text("-----")
+    global selector, turnPawn, checkmateBar
     selector = sprites.create(assets.image("""selector"""), 0)
     turnPawn = sprites.create(assets.image("""whitePawn"""), 0)
-    checkMateBar  = sprites.create(assets.image("""checkMateBar"""), 0)
-    checkMateBar.x = 137
-    checkMateBar.y = 47
+    checkmateBar  = sprites.create(assets.image("""checkmateBar"""), 0)
+    checkmateBar.x = 138
+    checkmateBar.y = 47
     selector.z = 4
 
     DrawPiecesProportionally()

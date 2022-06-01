@@ -21,14 +21,8 @@ let pieceFound = false
 let volume = 0
 let turnPawn : Sprite = null
 let selector : Sprite = null
-let checkMateBar : Sprite = null
+let checkmateBar : Sprite = null
 let tempSpriteNum = 0
-let checkText = textsprite.create("     ")
-checkText.x = 137
-checkText.y = 35
-let checkText2 = textsprite.create("     ")
-checkText2.x = 137
-checkText2.y = 45
 let placeFound = false
 selectorData = [4, 4, null]
 let pawnFirstMove = false
@@ -1107,15 +1101,13 @@ function CheckForChecks() {
         
     }
     if (actuallyChecked) {
-        checkText.x = 136
-        checkText.setText("CHECK")
+        animation.runImageAnimation(checkmateBar, assets.animation`checkmateBarCheck`, 50, false)
         if (!CanKingMove()) {
-            checkText2.setText("MATE")
+            animation.runImageAnimation(checkmateBar, assets.animation`checkmateBarCheckmate`, 50, false)
         }
         
     } else {
-        checkText.x = 137
-        checkText.setText("-----")
+        
     }
     
     console.log("CheckForChecks-Complete-SpotsFound-" + pieceValidKillSpacesCheckAll.length)
@@ -1157,13 +1149,11 @@ function CanKingMove(): boolean {
 function Setup() {
     // Initialize Commands, game is inert without them.
     
-    // checkText.set_text("-----")
-    // checkText2.set_text("-----")
     selector = sprites.create(assets.image`selector`, 0)
     turnPawn = sprites.create(assets.image`whitePawn`, 0)
-    let checkMateBar = sprites.create(assets.image`checkMateBar`, 0)
-    checkMateBar.x = 137
-    checkMateBar.y = 47
+    checkmateBar = sprites.create(assets.image`checkmateBar`, 0)
+    checkmateBar.x = 138
+    checkmateBar.y = 47
     selector.z = 4
     DrawPiecesProportionally()
     SetPositionOnBoard(selector, selectorData[0], selectorData[1])
