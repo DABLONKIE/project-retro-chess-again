@@ -1156,7 +1156,7 @@ function Setup() {
     turnPawn = sprites.create(assets.image`whitePawn`, 0)
     checkmateBar = sprites.create(assets.image`checkmateBar`, 0)
     checkmateBar.x = 138
-    checkmateBar.y = 47
+    checkmateBar.y = 40
     selector.z = 4
     DrawPiecesProportionally()
     SetPositionOnBoard(selector, selectorData[0], selectorData[1])
