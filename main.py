@@ -701,7 +701,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             if arrayType == 0: animation.run_image_animation(pieceValidKillSprites[i], assets.animation("""killSpaceAppear"""), 100, False)
     return killSpacesFound
 def CalculateCastleSpaces(pieceNum, draw = False):
-    global pieceValidCastleSpaces, pieceValidCastleSprites, pieces, piecesSprites
+    global pieceValidCastleSpaces, pieceValidCastleSprites, pieces, piecesSprites, swapType
     castleSpaceFound = False
     print("CalculateCastleSpaces-Initialized")
     if pieces[pieceNum][0] != 6:
