@@ -4,6 +4,7 @@ let pieceSprites : Sprite[] = []
 let pieceValidSprites : Sprite[] = []
 let pieceValidKillSprites : Sprite[] = []
 let pieceValidKillSpritesCheckAll : Sprite[] = []
+let pieceValidCastleSprites : Sprite[] = []
 let tempSprites : Sprite[] = []
 // Num Arrays
 let selectorData : number[] = []
@@ -14,6 +15,7 @@ let pieceValidSpacesCheckMate : number[][] = []
 let pieceValidKillSpaces : number[][] = []
 let pieceValidKillSpacesCheckMate : number[][] = []
 let pieceValidKillSpacesCheckAll : number[][] = []
+let pieceValidCastleSpaces : number[][] = []
 // Normal Variables
 let whoseTurn = 0
 let whoseTurnInvert = 1
@@ -44,7 +46,7 @@ volume = 2
 //  2 & 3: numbers are coordinates. Letters and numbers respectively.
 //  4: special tag, for example, pawn not moved, king castlin
 pieces = [[1, 0, 1, 2, 1], [1, 0, 2, 2, 1], [1, 0, 3, 2, 1], [1, 0, 4, 2, 1], [1, 0, 5, 2, 1], [1, 0, 6, 2, 1], [1, 0, 7, 2, 1], [1, 0, 8, 2, 1], [3, 0, 1, 1], [3, 0, 8, 1], [4, 0, 2, 1], [4, 0, 7, 1], [2, 0, 3, 1], [2, 0, 6, 1], [6, 0, 4, 1], [5, 0, 5, 1], [1, 1, 1, 7, 1], [1, 1, 2, 7, 1], [1, 1, 3, 7, 1], [1, 1, 4, 7, 1], [1, 1, 5, 7, 1], [1, 1, 6, 7, 1], [1, 1, 7, 7, 1], [1, 1, 8, 7, 1], [3, 1, 1, 8], [3, 1, 8, 8], [4, 1, 2, 8], [4, 1, 7, 8], [2, 1, 3, 8], [2, 1, 6, 8], [6, 1, 4, 8], [5, 1, 5, 8]]
-pieces = [[6, 0, 6, 6], [5, 1, 4, 6, 1], [5, 1, 3, 6, 1]]
+pieces = [[1, 0, 6, 6, 1], [6, 1, 4, 6]]
 //  ---------------------------------------------------------------------------------------- Board Funcs
 function DrawPiecesProportionally() {
     // Takes the pieces array and creates pieces accordingly.
@@ -1171,7 +1173,6 @@ function Setup() {
 function PromotionSequence(pnum: number, team: number) {
     // Sequence of promoting a pawn, mostly code about chosing the piece
     
-    UnbindAll()
     selector.setImage(assets.image`selectorPromotion`)
     if (team == 0) {
         animation.runImageAnimation(pieceSprites[pnum], assets.animation`promotionBegunWhite`, 50, false)
@@ -1194,7 +1195,6 @@ function PromotionSequence(pnum: number, team: number) {
     SetPositionOnBoard(promotionKnight, pieces[pnum][2] - 1, pieces[pnum][3])
     SetPositionOnBoard(promotionQueen, pieces[pnum][2] + 1, pieces[pnum][3])
     let chosen = 0
-    SafePause(350)
     controller.up.onEvent(ControllerButtonEvent.Pressed, function GoUpBishop() {
         
         chosen = 2
@@ -1249,7 +1249,8 @@ function UpdateColors() {
     color.setColor(7, color.rgb(CalGamma(50), CalGamma(50), CalGamma(50)))
     color.setColor(8, color.rgb(CalGamma(60), CalGamma(60), CalGamma(60)))
     color.setColor(10, color.rgb(CalGamma(50), CalGamma(200), CalGamma(50)))
-    color.setColor(9, color.rgb(CalGamma(200), 0, 0))
+    color.setColor(9, color.rgb(CalGamma(255), CalGamma(159), 0))
+    color.setColor(11, color.rgb(CalGamma(205), CalGamma(109), 0))
     color.setColor(14, color.rgb(CalGamma(50), CalGamma(150), CalGamma(50)))
     color.setColor(15, color.rgb(CalGamma(0), CalGamma(0), CalGamma(0)))
 }
@@ -1394,7 +1395,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
     let tempMemory: number;
     
     let killingPlace = false
-    UnbindAll()
+    // UnbindAll()
     for (i = 0; i < pieceValidSpaces.length; i++) {
         if (selectorData[0] == pieceValidSpaces[i][0] && selectorData[1] == pieceValidSpaces[i][1]) {
             placeFound = true
@@ -1506,9 +1507,9 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         
     }
     
-    BindAll(false)
 }
 
+// BindAll(False)
 function selectorPutDownCancel() {
     
     selectorData[0] = selectorData[3]

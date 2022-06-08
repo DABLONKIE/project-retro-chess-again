@@ -5,6 +5,7 @@ pieceSprites: List[Sprite] = []
 pieceValidSprites: List[Sprite] = []
 pieceValidKillSprites: List[Sprite] = []
 pieceValidKillSpritesCheckAll: List[Sprite] = []
+pieceValidCastleSprites: List[Sprite] = []
 tempSprites: List[Sprite] = []
 #Num Arrays
 selectorData: List[number] = [] #0,1=x,y 2=piece index 3,4 = original x,y
@@ -14,6 +15,8 @@ pieceValidSpacesCheckMate: List[List[number]] = []
 pieceValidKillSpaces: List[List[number]] = []
 pieceValidKillSpacesCheckMate: List[List[number]] = []
 pieceValidKillSpacesCheckAll: List[List[number]] = []
+pieceValidCastleSpaces: List[List[number]] = []
+
 
 #Normal Variables
 whoseTurn = 0
@@ -94,7 +97,7 @@ pieces = [
     [6, 1, 4, 8],
     [5, 1, 5, 8]]
 
-pieces = [[6,0,6,6],[5,1,4,6,1],[5,1,3,6,1]]
+pieces = [[1,0,6,6,1],[6,1,4,6]]
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
     global pieceAssetReference, pieceSprites
@@ -764,7 +767,6 @@ def Setup(): #Initialize Commands, game is inert without them.
     controller.right.on_event(ControllerButtonEvent.PRESSED, SelectorGoRIGHT)
 def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code about chosing the piece
     global pieceSprites, pieces
-    UnbindAll()
     selector.set_image(assets.image("""selectorPromotion"""))
     if team == 0: animation.run_image_animation(pieceSprites[pnum], assets.animation("promotionBegunWhite"), 50, False)
     if team == 1: animation.run_image_animation(pieceSprites[pnum], assets.animation("promotionBegunBlack"), 50, False)
@@ -781,7 +783,6 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
     SetPositionOnBoard(promotionKnight, pieces[pnum][2] - 1, pieces[pnum][3])
     SetPositionOnBoard(promotionQueen, pieces[pnum][2] + 1, pieces[pnum][3])
     chosen = 0
-    SafePause(350)
     def GoUpBishop():
         global chosen
         chosen = 2
@@ -831,7 +832,8 @@ def UpdateColors(): #Change color pallette, it would look dumb otherwise.
     color.set_color(7, color.rgb(CalGamma(50), CalGamma(50), CalGamma(50)))
     color.set_color(8, color.rgb(CalGamma(60), CalGamma(60), CalGamma(60)))
     color.set_color(10, color.rgb(CalGamma(50), CalGamma(200), CalGamma(50)))
-    color.set_color(9, color.rgb(CalGamma(200), 0, 0))
+    color.set_color(9, color.rgb(CalGamma(255), CalGamma(159), 0))
+    color.set_color(11, color.rgb(CalGamma(205), CalGamma(109), 0))
     color.set_color(14, color.rgb(CalGamma(50), CalGamma(150), CalGamma(50)))
     color.set_color(15, color.rgb(CalGamma(0), CalGamma(0), CalGamma(0)))
 # ---------------------------------------------------------------------------------------- Selector Funcs
@@ -947,7 +949,7 @@ def selectorPickUp():
 def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
     global placeFound, pieceValidSprites, pieceValidSpaces, pieceValidKillSprites, pieceValidKillSpaces, pieces, pawnFirstMove
     killingPlace = False
-    UnbindAll()
+    #UnbindAll()
     for i in range(len(pieceValidSpaces)):
         if selectorData[0] == pieceValidSpaces[i][0] and selectorData[1] == pieceValidSpaces[i][1]:
             placeFound = True
@@ -1027,7 +1029,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
         placeFound = False
         if not bypassCheck:
             CheckForChecks()
-    BindAll(False)
+    #BindAll(False)
 def selectorPutDownCancel():
     global pieceFound, selectorData, pawnFirstMove
     selectorData[0] = selectorData[3]
