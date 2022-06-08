@@ -1,6 +1,6 @@
 //  ---------------------------------------------------------------------------------------- Variable Setups
 // Sprite Arrays
-let pieceSprites : Sprite[] = []
+let piecesSprites : Sprite[] = []
 let pieceValidSprites : Sprite[] = []
 let pieceValidKillSprites : Sprite[] = []
 let pieceValidKillSpritesCheckAll : Sprite[] = []
@@ -34,27 +34,30 @@ let colorPalletteSwitched = true
 let gamma = 0
 let chosen = 0
 let check = 0
-UpdateColors()
+let swapType = 0
 let checked = 2
 // 0 = white | 1 = black | 2 = none
 let pieceAssetReference = [assets.image`whitePawn`, assets.image`whiteBishop`, assets.image`whiteRook`, assets.image`whiteKnight`, assets.image`whiteQueen`, assets.image`whiteKing`, assets.image`blackPawn`, assets.image`blackBishop`, assets.image`blackRook`, assets.image`blackKnight`, assets.image`blackQueen`, assets.image`blackKing`]
 let killSpaceAssetRefernce = [assets.image`killSpace`, assets.image`debug`, assets.image`emptySpace`]
-volume = 2
+let deadPiecesOffsetWhite = 0
+let deadPiecesOffsetBlack = 0
 //  Original Chess Positions
 //  0: 1=pawn  2=bishop  3=rook 4=knight 5=queen 6=king
 //  1: 0=white 1=black
 //  2 & 3: numbers are coordinates. Letters and numbers respectively.
 //  4: special tag, for example, pawn not moved, king castlin
-pieces = [[1, 0, 1, 2, 1], [1, 0, 2, 2, 1], [1, 0, 3, 2, 1], [1, 0, 4, 2, 1], [1, 0, 5, 2, 1], [1, 0, 6, 2, 1], [1, 0, 7, 2, 1], [1, 0, 8, 2, 1], [3, 0, 1, 1], [3, 0, 8, 1], [4, 0, 2, 1], [4, 0, 7, 1], [2, 0, 3, 1], [2, 0, 6, 1], [6, 0, 4, 1], [5, 0, 5, 1], [1, 1, 1, 7, 1], [1, 1, 2, 7, 1], [1, 1, 3, 7, 1], [1, 1, 4, 7, 1], [1, 1, 5, 7, 1], [1, 1, 6, 7, 1], [1, 1, 7, 7, 1], [1, 1, 8, 7, 1], [3, 1, 1, 8], [3, 1, 8, 8], [4, 1, 2, 8], [4, 1, 7, 8], [2, 1, 3, 8], [2, 1, 6, 8], [6, 1, 4, 8], [5, 1, 5, 8]]
-pieces = [[1, 0, 6, 6, 1], [6, 1, 4, 6]]
+pieces = [[1, 0, 1, 2, 1], [1, 0, 2, 2, 1], [1, 0, 3, 2, 1], [1, 0, 4, 2, 1], [1, 0, 5, 2, 1], [1, 0, 6, 2, 1], [1, 0, 7, 2, 1], [1, 0, 8, 2, 1], [3, 0, 1, 1], [3, 0, 8, 1], [4, 0, 2, 1], [4, 0, 7, 1], [2, 0, 3, 1], [2, 0, 6, 1], [6, 0, 4, 1, 1], [5, 0, 5, 1], [1, 1, 1, 7, 1], [1, 1, 2, 7, 1], [1, 1, 3, 7, 1], [1, 1, 4, 7, 1], [1, 1, 5, 7, 1], [1, 1, 6, 7, 1], [1, 1, 7, 7, 1], [1, 1, 8, 7, 1], [3, 1, 1, 8], [3, 1, 8, 8], [4, 1, 2, 8], [4, 1, 7, 8], [2, 1, 3, 8], [2, 1, 6, 8], [6, 1, 4, 8, 1], [5, 1, 5, 8]]
+// pieces = [[1,0,6,6,1],[6,1,4,6]]  #Check testing
+pieces = [[6, 0, 4, 1, 1], [3, 0, 1, 1], [1, 1, 1, 8, 1]]
+// Castle testing
 //  ---------------------------------------------------------------------------------------- Board Funcs
 function DrawPiecesProportionally() {
     // Takes the pieces array and creates pieces accordingly.
     
     scene.setBackgroundImage(assets.image`chessBoard`)
     for (let i = 0; i < pieces.length; i++) {
-        pieceSprites.push(sprites.create(CalPieceSprite(pieces[i][0], pieces[i][1])))
-        SetPositionOnBoard(pieceSprites[i], pieces[i][2], pieces[i][3])
+        piecesSprites.push(sprites.create(CalPieceSprite(pieces[i][0], pieces[i][1])))
+        SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3])
     }
 }
 
@@ -1075,6 +1078,51 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
     return killSpacesFound
 }
 
+function CalculateCastleSpaces(pieceNum: number, draw: boolean = false): boolean {
+    let i: number;
+    
+    let castleSpaceFound = false
+    console.log("CalculateCastleSpaces-Initialized")
+    if (pieces[pieceNum][0] != 6) {
+        console.log("CalculateCastleSpaces-Cancelled-WrongPiece")
+        return false
+    }
+    
+    if (pieces[pieceNum][1] == 0 && pieces[pieceNum][4] == 1) {
+        for (i = 0; i < pieces.length; i++) {
+            if (pieces[i][1] == 0) {
+                if (pieces[i][0] == 3) {
+                    if (pieces[i][2] == 1 && pieces[i][3] == 1) {
+                        pieceValidCastleSpaces.push([1, 1])
+                        castleSpaceFound = true
+                    } else if (pieces[i][2] == 8 && pieces[i][3] == 1) {
+                        pieceValidCastleSpaces.push([8, 1])
+                        castleSpaceFound = true
+                    }
+                    
+                }
+                
+            }
+            
+        }
+    }
+    
+    if (castleSpaceFound && draw) {
+        for (i = 0; i < pieceValidCastleSpaces.length; i++) {
+            pieceValidCastleSprites.push(sprites.create(assets.image`castleSpace`))
+            SetPositionOnBoard(pieceValidCastleSprites[i], pieceValidCastleSpaces[i][0], pieceValidCastleSpaces[i][1])
+            pieceValidCastleSprites[i].z = 3
+            animation.runImageAnimation(pieceValidCastleSprites[i], assets.animation`castleSpaceAnim`, 100, true)
+        }
+    }
+    
+    if (castleSpaceFound) {
+        return true
+    }
+    
+    return false
+}
+
 function CheckForChecks() {
     let i: number;
     // Is the king in peril?
@@ -1158,8 +1206,9 @@ function Setup() {
     turnPawn = sprites.create(assets.image`whitePawn`, 0)
     checkmateBar = sprites.create(assets.image`checkmateBar`, 0)
     checkmateBar.x = 138
-    checkmateBar.y = 40
+    checkmateBar.y = 38
     selector.z = 4
+    UpdateColors()
     DrawPiecesProportionally()
     SetPositionOnBoard(selector, selectorData[0], selectorData[1])
     SetPositionOnBoard(turnPawn, 12, 8, false, 1)
@@ -1175,11 +1224,11 @@ function PromotionSequence(pnum: number, team: number) {
     
     selector.setImage(assets.image`selectorPromotion`)
     if (team == 0) {
-        animation.runImageAnimation(pieceSprites[pnum], assets.animation`promotionBegunWhite`, 50, false)
+        animation.runImageAnimation(piecesSprites[pnum], assets.animation`promotionBegunWhite`, 50, false)
     }
     
     if (team == 1) {
-        animation.runImageAnimation(pieceSprites[pnum], assets.animation`promotionBegunBlack`, 50, false)
+        animation.runImageAnimation(piecesSprites[pnum], assets.animation`promotionBegunBlack`, 50, false)
     }
     
     let promotionRing = sprites.create(assets.image`promotionChooser`)
@@ -1222,7 +1271,7 @@ function PromotionSequence(pnum: number, team: number) {
         }
         
         pieces[pnum][0] = chosen
-        pieceSprites[pnum].setImage(CalPieceSprite(chosen, team))
+        piecesSprites[pnum].setImage(CalPieceSprite(chosen, team))
         promotionBishop.destroy()
         promotionRook.destroy()
         promotionKnight.destroy()
@@ -1261,7 +1310,7 @@ function SelectorGoRIGHT() {
         selectorData[0] += 1
         SetPositionOnBoard(selector, selectorData[0], selectorData[1])
         if (!(selectorData[2] == null)) {
-            SetPositionOnBoard(pieceSprites[selectorData[2]], selectorData[0], selectorData[1], true)
+            SetPositionOnBoard(piecesSprites[selectorData[2]], selectorData[0], selectorData[1], true)
         }
         
     } else {
@@ -1275,7 +1324,7 @@ function SelectorGoLEFT() {
         selectorData[0] -= 1
         SetPositionOnBoard(selector, selectorData[0], selectorData[1])
         if (!(selectorData[2] == null)) {
-            SetPositionOnBoard(pieceSprites[selectorData[2]], selectorData[0], selectorData[1], true)
+            SetPositionOnBoard(piecesSprites[selectorData[2]], selectorData[0], selectorData[1], true)
         }
         
     } else {
@@ -1289,7 +1338,7 @@ function SelectorGoUP() {
         selectorData[1] += 1
         SetPositionOnBoard(selector, selectorData[0], selectorData[1])
         if (!(selectorData[2] == null)) {
-            SetPositionOnBoard(pieceSprites[selectorData[2]], selectorData[0], selectorData[1], true)
+            SetPositionOnBoard(piecesSprites[selectorData[2]], selectorData[0], selectorData[1], true)
         }
         
     } else {
@@ -1303,7 +1352,7 @@ function SelectorGoDOWN() {
         selectorData[1] -= 1
         SetPositionOnBoard(selector, selectorData[0], selectorData[1])
         if (!(selectorData[2] == null)) {
-            SetPositionOnBoard(pieceSprites[selectorData[2]], selectorData[0], selectorData[1], true)
+            SetPositionOnBoard(piecesSprites[selectorData[2]], selectorData[0], selectorData[1], true)
         }
         
     } else {
@@ -1334,27 +1383,31 @@ function selectorPickUp() {
             // PickUpSoundEffect()
             controller.A.onEvent(ControllerButtonEvent.Pressed, ButtonBoundSelectorPutDown)
             controller.B.onEvent(ControllerButtonEvent.Pressed, selectorPutDownCancel)
-            pieceSprites[selectorData[2]].setPosition(pieceSprites[selectorData[2]].x, pieceSprites[selectorData[2]].y)
-            pieceSprites[selectorData[2]].z = 3
+            piecesSprites[selectorData[2]].setPosition(piecesSprites[selectorData[2]].x, piecesSprites[selectorData[2]].y)
+            piecesSprites[selectorData[2]].z = 3
             tempMemory = selectorData[2]
             SafeAnimPause(180, true)
             timer.after(60, function frame1() {
-                pieceSprites[tempMemory].y += 1
+                piecesSprites[tempMemory].y += 1
             })
             timer.after(90, function frame2() {
-                pieceSprites[tempMemory].y -= 1
+                piecesSprites[tempMemory].y -= 1
             })
             timer.after(120, function frame3() {
-                pieceSprites[tempMemory].y -= 3
+                piecesSprites[tempMemory].y -= 3
             })
             timer.after(150, function frame4() {
-                pieceSprites[tempMemory].y -= 5
+                piecesSprites[tempMemory].y -= 5
             })
             timer.after(180, function frame5() {
-                pieceSprites[tempMemory].y -= 1
+                piecesSprites[tempMemory].y -= 1
             })
             CalculateValidSpaces(selectorData[2], true)
             CalculateKillSpaces(selectorData[2], true)
+            if (pieces[selectorData[2]][0] == 6) {
+                CalculateCastleSpaces(selectorData[2], true)
+            }
+            
             pieceFound = false
             BindAll(true)
         } else if (CalculateKillSpaces(selectorData[2])) {
@@ -1362,13 +1415,13 @@ function selectorPickUp() {
             animation.runImageAnimation(selector, assets.animation`selectorPickupAnim`, 30, false)
             // PickUpSoundEffect()
             controller.A.onEvent(ControllerButtonEvent.Pressed, ButtonBoundSelectorPutDown)
-            pieceSprites[selectorData[2]].setPosition(pieceSprites[selectorData[2]].x, pieceSprites[selectorData[2]].y - 10)
-            pieceSprites[selectorData[2]].z = 3
-            pieceSprites[selectorData[2]].y += 1
+            piecesSprites[selectorData[2]].setPosition(piecesSprites[selectorData[2]].x, piecesSprites[selectorData[2]].y - 10)
+            piecesSprites[selectorData[2]].z = 3
+            piecesSprites[selectorData[2]].y += 1
             CalculateValidSpaces(selectorData[2], true)
             CalculateKillSpaces(selectorData[2], true, 0, false)
             pieceFound = false
-            pieceSprites[selectorData[2]].y -= 1
+            piecesSprites[selectorData[2]].y -= 1
         } else {
             console.log("PickUp-No valid spaces")
             selectorPutDown(true)
@@ -1392,9 +1445,12 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
     let i: number;
     let teamBuffer: number;
     let promotion: boolean;
+    let currentOffset: number;
     let tempMemory: number;
     
+    
     let killingPlace = false
+    let swapPlace = false
     // UnbindAll()
     for (i = 0; i < pieceValidSpaces.length; i++) {
         if (selectorData[0] == pieceValidSpaces[i][0] && selectorData[1] == pieceValidSpaces[i][1]) {
@@ -1403,13 +1459,21 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         }
         
     }
-    for (i = 0; i < pieceValidKillSprites.length; i++) {
+    for (i = 0; i < pieceValidKillSpaces.length; i++) {
         if (selectorData[0] == pieceValidKillSpaces[i][0] && selectorData[1] == pieceValidKillSpaces[i][1]) {
             killingPlace = true
             placeFound = true
             // KillSoundEffect()
             // tempX, tempY = SetPositionOnBoard(None, selectorData[0],selectorData[1])
             // CreateTempSprite(300, assets.animation("""returnToDust"""), tempX, tempY, 60)
+            break
+        }
+        
+    }
+    for (i = 0; i < pieceValidCastleSpaces.length; i++) {
+        if (selectorData[0] == pieceValidCastleSpaces[i][0] && selectorData[1] == pieceValidCastleSpaces[i][1]) {
+            swapPlace = true
+            placeFound = true
             break
         }
         
@@ -1424,7 +1488,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         // PutDownSoundEffect()
         controller.A.onEvent(ControllerButtonEvent.Pressed, selectorPickUp)
         controller.B.onEvent(ControllerButtonEvent.Pressed, null)
-        pieceSprites[selectorData[2]].z = 0
+        piecesSprites[selectorData[2]].z = 0
         if (pawnFirstMove && !bypassCheck) {
             pieces[selectorData[2]][4] = 0
         }
@@ -1432,9 +1496,28 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         if (killingPlace) {
             for (i = 0; i < pieces.length; i++) {
                 if (pieces[i][2] == selectorData[0] && pieces[i][3] == selectorData[1]) {
-                    pieces[i][2] = 20
-                    pieces[i][3] = 20
-                    SetPositionOnBoard(pieceSprites[i], pieces[i][2], pieces[i][3])
+                    currentOffset = 0
+                    if (whoseTurn == 0) {
+                        currentOffset = deadPiecesOffsetWhite
+                        deadPiecesOffsetWhite += 2
+                    } else if (whoseTurn == 1) {
+                        currentOffset = deadPiecesOffsetBlack
+                        deadPiecesOffsetBlack += 2
+                    }
+                    
+                    pieces[i][2] = 10 + whoseTurn * 2 + currentOffset
+                    pieces[i][3] = 4
+                    SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3])
+                    break
+                }
+                
+            }
+        }
+        
+        if (swapPlace) {
+            for (i = 0; i < pieces.length; i++) {
+                if (pieces[i][2] == selectorData[0] && pieces[i][3] == selectorData[1]) {
+                    SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3])
                     break
                 }
                 
@@ -1458,7 +1541,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
             pieces[selectorData[2]][4] = 0
         }
         
-        SetPositionOnBoard(pieceSprites[selectorData[2]], pieces[selectorData[2]][2], pieces[selectorData[2]][3])
+        SetPositionOnBoard(piecesSprites[selectorData[2]], pieces[selectorData[2]][2], pieces[selectorData[2]][3])
         for (i = 0; i < pieceValidSprites.length; i++) {
             pieceValidSprites[i].destroy()
         }
@@ -1471,25 +1554,28 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
             
             pieceValidKillSprites[i].destroy()
         }
+        for (i = 0; i < pieceValidCastleSprites.length; i++) {
+            pieceValidCastleSprites[i].destroy()
+        }
         if (!noAnim && !promotion) {
             animation.runImageAnimation(selector, assets.animation`selectorPutdownAnim`, 50, false)
             tempMemory = selectorData[2]
-            pieceSprites[tempMemory].y -= 9
+            piecesSprites[tempMemory].y -= 9
             SafeAnimPause(250)
             timer.after(50, function frame1() {
-                pieceSprites[tempMemory].y += 5
+                piecesSprites[tempMemory].y += 5
             })
             timer.after(100, function frame2() {
-                pieceSprites[tempMemory].y += 4
+                piecesSprites[tempMemory].y += 4
             })
             timer.after(200, function frame3() {
-                pieceSprites[tempMemory].y += 1
+                piecesSprites[tempMemory].y += 1
             })
             timer.after(250, function frame4() {
-                pieceSprites[tempMemory].y -= 1
+                piecesSprites[tempMemory].y -= 1
             })
         } else if (!promotion) {
-            // pieceSprites[selectorData[2]].y -= 1
+            // piecesSprites[selectorData[2]].y -= 1
             selector.setImage(assets.image`selector`)
         } else if (promotion) {
             PromotionSequence(selectorData[2], teamBuffer)
@@ -1500,6 +1586,8 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         pieceValidSpaces = []
         pieceValidKillSpaces = []
         pieceValidKillSprites = []
+        pieceValidCastleSpaces = []
+        pieceValidCastleSprites = []
         placeFound = false
         if (!bypassCheck) {
             CheckForChecks()
@@ -1514,7 +1602,7 @@ function selectorPutDownCancel() {
     
     selectorData[0] = selectorData[3]
     selectorData[1] = selectorData[4]
-    SetPositionOnBoard(pieceSprites[selectorData[2]], selectorData[0], selectorData[1], true)
+    SetPositionOnBoard(piecesSprites[selectorData[2]], selectorData[0], selectorData[1], true)
     SetPositionOnBoard(selector, selectorData[0], selectorData[1])
     selectorPutDown(true, true, true)
     pieceFound = false

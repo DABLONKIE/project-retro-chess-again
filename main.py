@@ -1,7 +1,7 @@
 # ---------------------------------------------------------------------------------------- Variable Setups
 
 #Sprite Arrays
-pieceSprites: List[Sprite] = []
+piecesSprites: List[Sprite] = []
 pieceValidSprites: List[Sprite] = []
 pieceValidKillSprites: List[Sprite] = []
 pieceValidKillSpritesCheckAll: List[Sprite] = []
@@ -36,7 +36,7 @@ colorPalletteSwitched = True
 gamma = 0
 chosen = 0
 check = 0
-UpdateColors()
+swapType = 0
 checked = 2 #0 = white | 1 = black | 2 = none
 pieceAssetReference = [
     assets.image("""whitePawn"""),
@@ -56,8 +56,8 @@ killSpaceAssetRefernce = [
     assets.image("""debug"""),
     assets.image("""emptySpace""")]
 
-volume = 2
-
+deadPiecesOffsetWhite = 0
+deadPiecesOffsetBlack = 0
 # Original Chess Positions
 # 0: 1=pawn  2=bishop  3=rook 4=knight 5=queen 6=king
 # 1: 0=white 1=black
@@ -78,7 +78,7 @@ pieces = [
     [4, 0, 7, 1],
     [2, 0, 3, 1],
     [2, 0, 6, 1],
-    [6, 0, 4, 1],
+    [6, 0, 4, 1, 1],
     [5, 0, 5, 1],
     [1, 1, 1, 7, 1],
     [1, 1, 2, 7, 1],
@@ -94,17 +94,18 @@ pieces = [
     [4, 1, 7, 8],
     [2, 1, 3, 8],
     [2, 1, 6, 8],
-    [6, 1, 4, 8],
+    [6, 1, 4, 8, 1],
     [5, 1, 5, 8]]
 
-pieces = [[1,0,6,6,1],[6,1,4,6]]
+#pieces = [[1,0,6,6,1],[6,1,4,6]]  #Check testing
+pieces = [[6,0,4,1,1],[3,0,1,1], [1,1,1,8,1]]  #Castle testing
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
-    global pieceAssetReference, pieceSprites
+    global pieceAssetReference, piecesSprites
     scene.set_background_image(assets.image("""chessBoard"""))
     for i in range(len(pieces)):
-        pieceSprites.append(sprites.create(CalPieceSprite(pieces[i][0],pieces[i][1])))
-        SetPositionOnBoard(pieceSprites[i], pieces[i][2], pieces[i][3])
+        piecesSprites.append(sprites.create(CalPieceSprite(pieces[i][0],pieces[i][1])))
+        SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3])
 def SetPositionOnBoard(sprite: Sprite, toX, toY, selected = False, OffX = 0, OffY = 0): #Handy function for setting pieces into position.
     #thank god i made this btw
     goX = (6 + 12 * toX) + OffX
@@ -699,6 +700,32 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             pieceValidKillSprites[i].z = 3
             if arrayType == 0: animation.run_image_animation(pieceValidKillSprites[i], assets.animation("""killSpaceAppear"""), 100, False)
     return killSpacesFound
+def CalculateCastleSpaces(pieceNum, draw = False):
+    global pieceValidCastleSpaces, pieceValidCastleSprites, pieces, piecesSprites
+    castleSpaceFound = False
+    print("CalculateCastleSpaces-Initialized")
+    if pieces[pieceNum][0] != 6:
+        print("CalculateCastleSpaces-Cancelled-WrongPiece")
+        return False
+    if pieces[pieceNum][1] == 0 and pieces[pieceNum][4] == 1:
+        for i in range(len(pieces)):
+            if pieces[i][1] == 0:
+                if pieces[i][0] == 3:
+                    if pieces[i][2] == 1 and pieces[i][3] == 1:
+                        pieceValidCastleSpaces.append([1,1])
+                        castleSpaceFound = True
+                    elif pieces[i][2] == 8 and pieces[i][3] == 1:
+                        pieceValidCastleSpaces.append([8,1])
+                        castleSpaceFound = True
+    if castleSpaceFound and draw:
+        for i in range(len(pieceValidCastleSpaces)):
+            pieceValidCastleSprites.append(sprites.create(assets.image("""castleSpace""")))
+            SetPositionOnBoard(pieceValidCastleSprites[i],pieceValidCastleSpaces[i][0],pieceValidCastleSpaces[i][1])
+            pieceValidCastleSprites[i].z = 3
+            animation.run_image_animation(pieceValidCastleSprites[i], assets.animation("""castleSpaceAnim"""), 100, True)
+    if castleSpaceFound:
+        return True
+    return False
 def CheckForChecks(): #Is the king in peril?
     global pieces, whoseTurn, whoseTurnInvert, checked, pieceValidKillSpacesCheckAll, checkmateBar, check
     print("CheckForChecks-Started")
@@ -753,9 +780,10 @@ def Setup(): #Initialize Commands, game is inert without them.
     turnPawn = sprites.create(assets.image("""whitePawn"""), 0)
     checkmateBar  = sprites.create(assets.image("""checkmateBar"""), 0)
     checkmateBar.x = 138
-    checkmateBar.y = 40
+    checkmateBar.y = 38
     selector.z = 4
 
+    UpdateColors()
     DrawPiecesProportionally()
     SetPositionOnBoard(selector, selectorData[0], selectorData[1])
     SetPositionOnBoard(turnPawn, 12, 8, False, 1)
@@ -766,10 +794,10 @@ def Setup(): #Initialize Commands, game is inert without them.
     controller.left.on_event(ControllerButtonEvent.PRESSED, SelectorGoLEFT)
     controller.right.on_event(ControllerButtonEvent.PRESSED, SelectorGoRIGHT)
 def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code about chosing the piece
-    global pieceSprites, pieces
+    global piecesSprites, pieces
     selector.set_image(assets.image("""selectorPromotion"""))
-    if team == 0: animation.run_image_animation(pieceSprites[pnum], assets.animation("promotionBegunWhite"), 50, False)
-    if team == 1: animation.run_image_animation(pieceSprites[pnum], assets.animation("promotionBegunBlack"), 50, False)
+    if team == 0: animation.run_image_animation(piecesSprites[pnum], assets.animation("promotionBegunWhite"), 50, False)
+    if team == 1: animation.run_image_animation(piecesSprites[pnum], assets.animation("promotionBegunBlack"), 50, False)
     promotionRing = sprites.create(assets.image("""promotionChooser"""))
     animation.run_image_animation(promotionRing, assets.animation("""promotionChooserAppear"""), 100, False)
     promotionBishop = sprites.create(CalPieceSprite(2, team))
@@ -804,7 +832,7 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
         if chosen == 0:
             return None
         pieces[pnum][0] = chosen
-        pieceSprites[pnum].set_image(CalPieceSprite(chosen, team))
+        piecesSprites[pnum].set_image(CalPieceSprite(chosen, team))
         promotionBishop.destroy()
         promotionRook.destroy()
         promotionKnight.destroy()
@@ -842,7 +870,7 @@ def SelectorGoRIGHT():
         selectorData[0] += 1
         SetPositionOnBoard(selector, selectorData[0], selectorData[1])
         if not (selectorData[2] == None):
-            SetPositionOnBoard(pieceSprites[selectorData[2]],selectorData[0],selectorData[1],True)
+            SetPositionOnBoard(piecesSprites[selectorData[2]],selectorData[0],selectorData[1],True)
     else:
         pass
 def SelectorGoLEFT():
@@ -850,7 +878,7 @@ def SelectorGoLEFT():
         selectorData[0] -= 1
         SetPositionOnBoard(selector, selectorData[0], selectorData[1])
         if not (selectorData[2] == None):
-            SetPositionOnBoard(pieceSprites[selectorData[2]],
+            SetPositionOnBoard(piecesSprites[selectorData[2]],
                 selectorData[0],
                 selectorData[1],
                 True)
@@ -861,7 +889,7 @@ def SelectorGoUP():
         selectorData[1] += 1
         SetPositionOnBoard(selector, selectorData[0], selectorData[1])
         if not (selectorData[2] == None):
-            SetPositionOnBoard(pieceSprites[selectorData[2]],
+            SetPositionOnBoard(piecesSprites[selectorData[2]],
                 selectorData[0],
                 selectorData[1],
                 True)
@@ -872,7 +900,7 @@ def SelectorGoDOWN():
         selectorData[1] -= 1
         SetPositionOnBoard(selector, selectorData[0], selectorData[1])
         if not (selectorData[2] == None):
-            SetPositionOnBoard(pieceSprites[selectorData[2]],
+            SetPositionOnBoard(piecesSprites[selectorData[2]],
                 selectorData[0],
                 selectorData[1],
                 True)
@@ -896,28 +924,29 @@ def selectorPickUp():
             #PickUpSoundEffect()
             controller.A.on_event(ControllerButtonEvent.PRESSED, ButtonBoundSelectorPutDown)
             controller.B.on_event(ControllerButtonEvent.PRESSED, selectorPutDownCancel)
-            pieceSprites[selectorData[2]].set_position(pieceSprites[selectorData[2]].x,
-                pieceSprites[selectorData[2]].y)
-            pieceSprites[selectorData[2]].z = 3
+            piecesSprites[selectorData[2]].set_position(piecesSprites[selectorData[2]].x,
+                piecesSprites[selectorData[2]].y)
+            piecesSprites[selectorData[2]].z = 3
             tempMemory = selectorData[2]
             SafeAnimPause(180, True)
             def frame1():
-                pieceSprites[tempMemory].y += 1
+                piecesSprites[tempMemory].y += 1
             timer.after(60, frame1)
             def frame2():
-                pieceSprites[tempMemory].y -= 1
+                piecesSprites[tempMemory].y -= 1
             timer.after(90, frame2)
             def frame3():
-                pieceSprites[tempMemory].y -= 3
+                piecesSprites[tempMemory].y -= 3
             timer.after(120, frame3)
             def frame4():
-                pieceSprites[tempMemory].y -= 5
+                piecesSprites[tempMemory].y -= 5
             timer.after(150, frame4)
             def frame5():
-                pieceSprites[tempMemory].y -= 1
+                piecesSprites[tempMemory].y -= 1
             timer.after(180, frame5)
             CalculateValidSpaces(selectorData[2],True)
             CalculateKillSpaces(selectorData[2],True)
+            if pieces[selectorData[2]][0] == 6: CalculateCastleSpaces(selectorData[2],True)
             pieceFound = False
             BindAll(True)
         elif CalculateKillSpaces(selectorData[2]):
@@ -925,14 +954,14 @@ def selectorPickUp():
             animation.run_image_animation(selector,assets.animation("""selectorPickupAnim"""), 30, False)
             #PickUpSoundEffect()
             controller.A.on_event(ControllerButtonEvent.PRESSED, ButtonBoundSelectorPutDown)
-            pieceSprites[selectorData[2]].set_position(pieceSprites[selectorData[2]].x,
-                pieceSprites[selectorData[2]].y - 10)
-            pieceSprites[selectorData[2]].z = 3
-            pieceSprites[selectorData[2]].y += 1
+            piecesSprites[selectorData[2]].set_position(piecesSprites[selectorData[2]].x,
+                piecesSprites[selectorData[2]].y - 10)
+            piecesSprites[selectorData[2]].z = 3
+            piecesSprites[selectorData[2]].y += 1
             CalculateValidSpaces(selectorData[2],True)
             CalculateKillSpaces(selectorData[2],True,0,False)
             pieceFound = False
-            pieceSprites[selectorData[2]].y -= 1
+            piecesSprites[selectorData[2]].y -= 1
         else:
             print("PickUp-No valid spaces")
             selectorPutDown(True)
@@ -947,20 +976,27 @@ def selectorPickUp():
         #DenySoundEffect()
     BindAll(False)
 def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
-    global placeFound, pieceValidSprites, pieceValidSpaces, pieceValidKillSprites, pieceValidKillSpaces, pieces, pawnFirstMove
+    global placeFound, pieceValidSprites, pieceValidSpaces, pieceValidKillSprites, pieceValidKillSpaces, pieceValidCastleSpaces, pieceValidCastleSprites, pieces, pawnFirstMove
+    global swapType, whoseTurnInvert, deadPiecesOffsetWhite, deadPiecesOffsetBlack
     killingPlace = False
+    swapPlace = False
     #UnbindAll()
     for i in range(len(pieceValidSpaces)):
         if selectorData[0] == pieceValidSpaces[i][0] and selectorData[1] == pieceValidSpaces[i][1]:
             placeFound = True
             break
-    for i in range(len(pieceValidKillSprites)):
+    for i in range(len(pieceValidKillSpaces)):
         if selectorData[0] == pieceValidKillSpaces[i][0] and selectorData[1] == pieceValidKillSpaces[i][1]:
             killingPlace = True
             placeFound = True
             #KillSoundEffect()
             #tempX, tempY = SetPositionOnBoard(None, selectorData[0],selectorData[1])
             #CreateTempSprite(300, assets.animation("""returnToDust"""), tempX, tempY, 60)
+            break
+    for i in range(len(pieceValidCastleSpaces)):
+        if selectorData[0] == pieceValidCastleSpaces[i][0] and selectorData[1] == pieceValidCastleSpaces[i][1]:
+            swapPlace = True
+            placeFound = True
             break
     if placeFound or bypassCheck:
         teamBuffer = whoseTurn
@@ -969,15 +1005,28 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
         #PutDownSoundEffect()
         controller.A.on_event(ControllerButtonEvent.PRESSED, selectorPickUp)
         controller.B.on_event(ControllerButtonEvent.PRESSED, None)
-        pieceSprites[selectorData[2]].z = 0
+        piecesSprites[selectorData[2]].z = 0
         if pawnFirstMove and not bypassCheck:
             pieces[selectorData[2]][4] = 0
         if killingPlace:
             for i in range(len(pieces)):
                 if pieces[i][2] == selectorData[0] and pieces[i][3] == selectorData[1]:
-                    pieces[i][2] = 20
-                    pieces[i][3] = 20
-                    SetPositionOnBoard(pieceSprites[i], pieces[i][2], pieces[i][3])
+                    currentOffset = 0
+                    if whoseTurn == 0: 
+                        currentOffset = deadPiecesOffsetWhite
+                        deadPiecesOffsetWhite += 2
+                    elif whoseTurn == 1: 
+                        currentOffset = deadPiecesOffsetBlack
+                        deadPiecesOffsetBlack += 2
+                    
+                    pieces[i][2] = 10 + (whoseTurn * 2) + currentOffset
+                    pieces[i][3] = 4
+                    SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3])
+                    break
+        if swapPlace:
+            for i in range(len(pieces)):
+                if pieces[i][2] == selectorData[0] and pieces[i][3] == selectorData[1]:
+                    SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3])
                     break
         pieces[selectorData[2]][2] = selectorData[0]
         pieces[selectorData[2]][3] = selectorData[1]
@@ -988,7 +1037,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
                 promotion = True
         if pieces[selectorData[2]][4] == 1 and not bypassCheck:
             pieces[selectorData[2]][4] = 0
-        SetPositionOnBoard(pieceSprites[selectorData[2]],
+        SetPositionOnBoard(piecesSprites[selectorData[2]],
             pieces[selectorData[2]][2],
             pieces[selectorData[2]][3])
         for i in range(len(pieceValidSprites)):
@@ -999,25 +1048,27 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
             else:
                 CreateTempSprite(300, assets.animation("""killSpaceDisappear"""), pieceValidKillSprites[i].x, pieceValidKillSprites[i].y, 100, 0, 0, 5)
             pieceValidKillSprites[i].destroy()
+        for i in range(len(pieceValidCastleSprites)):
+            pieceValidCastleSprites[i].destroy()
         if not noAnim and not promotion :
             animation.run_image_animation(selector,assets.animation("""selectorPutdownAnim"""), 50, False)
             tempMemory = selectorData[2]
-            pieceSprites[tempMemory].y -= 9
+            piecesSprites[tempMemory].y -= 9
             SafeAnimPause(250)
             def frame1():
-                pieceSprites[tempMemory].y += 5
+                piecesSprites[tempMemory].y += 5
             timer.after(50, frame1)
             def frame2():
-                pieceSprites[tempMemory].y += 4
+                piecesSprites[tempMemory].y += 4
             timer.after(100, frame2)
             def frame3():
-                pieceSprites[tempMemory].y += 1
+                piecesSprites[tempMemory].y += 1
             timer.after(200, frame3)
             def frame4():
-                pieceSprites[tempMemory].y -= 1
+                piecesSprites[tempMemory].y -= 1
             timer.after(250, frame4)
         elif not promotion:
-            #pieceSprites[selectorData[2]].y -= 1
+            #piecesSprites[selectorData[2]].y -= 1
             selector.set_image(assets.image("""selector"""))
         elif promotion:
             PromotionSequence(selectorData[2], teamBuffer)
@@ -1026,6 +1077,8 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
         pieceValidSpaces = []
         pieceValidKillSpaces = []
         pieceValidKillSprites = []
+        pieceValidCastleSpaces = []
+        pieceValidCastleSprites = []
         placeFound = False
         if not bypassCheck:
             CheckForChecks()
@@ -1034,7 +1087,7 @@ def selectorPutDownCancel():
     global pieceFound, selectorData, pawnFirstMove
     selectorData[0] = selectorData[3]
     selectorData[1] = selectorData[4]
-    SetPositionOnBoard(pieceSprites[selectorData[2]],
+    SetPositionOnBoard(piecesSprites[selectorData[2]],
     selectorData[0],
     selectorData[1],
     True)
