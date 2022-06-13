@@ -98,7 +98,7 @@ pieces = [
     [5, 1, 5, 8]]
 
 #pieces = [[1,0,6,6,1],[6,1,4,6]]  #Check testing
-pieces = [[6,0,4,1,1],[3,0,1,1], [1,1,1,8,1]]  #Castle testing
+pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
     global pieceAssetReference, piecesSprites
@@ -703,7 +703,19 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
 def CalculateCastleSpaces(pieceNum, draw = False):
     global pieceValidCastleSpaces, pieceValidCastleSprites, pieces, piecesSprites, swapType
     castleSpaceFound = False
+    leftEmpty = True
+    rightEmpty = True
     print("CalculateCastleSpaces-Initialized")
+    for i in range(2):
+        print("CalculateCastleSpaces-RunningLeft-"+(i+1)+", 1")
+        for b in range(len(pieces)):
+            if pieces[b][2] == i + 2 and pieces[b][3] == 1:
+                leftEmpty = False
+    for i in range(3):
+        print("CalculateCastleSpaces-RunningLeft-"+(i+5)+", 1")
+        for b in range(len(pieces)):
+            if pieces[b][2] == i + 5 and pieces[b][3] == 1:
+                rightEmpty = False
     if pieces[pieceNum][0] != 6:
         print("CalculateCastleSpaces-Cancelled-WrongPiece")
         return False
@@ -711,10 +723,10 @@ def CalculateCastleSpaces(pieceNum, draw = False):
         for i in range(len(pieces)):
             if pieces[i][1] == 0:
                 if pieces[i][0] == 3:
-                    if pieces[i][2] == 1 and pieces[i][3] == 1:
+                    if pieces[i][2] == 1 and pieces[i][3] == 1 and leftEmpty:
                         pieceValidCastleSpaces.append([1,1])
                         castleSpaceFound = True
-                    elif pieces[i][2] == 8 and pieces[i][3] == 1:
+                    elif pieces[i][2] == 8 and pieces[i][3] == 1 and rightEmpty:
                         pieceValidCastleSpaces.append([8,1])
                         castleSpaceFound = True
     if castleSpaceFound and draw:
