@@ -48,8 +48,7 @@ let deadPiecesOffsetBlack = 0
 //  4: special tag, for example, pawn not moved, king castlin
 pieces = [[1, 0, 1, 2, 1], [1, 0, 2, 2, 1], [1, 0, 3, 2, 1], [1, 0, 4, 2, 1], [1, 0, 5, 2, 1], [1, 0, 6, 2, 1], [1, 0, 7, 2, 1], [1, 0, 8, 2, 1], [3, 0, 1, 1], [3, 0, 8, 1], [4, 0, 2, 1], [4, 0, 7, 1], [2, 0, 3, 1], [2, 0, 6, 1], [6, 0, 4, 1, 1], [5, 0, 5, 1], [1, 1, 1, 7, 1], [1, 1, 2, 7, 1], [1, 1, 3, 7, 1], [1, 1, 4, 7, 1], [1, 1, 5, 7, 1], [1, 1, 6, 7, 1], [1, 1, 7, 7, 1], [1, 1, 8, 7, 1], [3, 1, 1, 8], [3, 1, 8, 8], [4, 1, 2, 8], [4, 1, 7, 8], [2, 1, 3, 8], [2, 1, 6, 8], [6, 1, 4, 8, 1], [5, 1, 5, 8]]
 // pieces = [[1,0,6,6,1],[6,1,4,6]]  #Check testing
-pieces = [[6, 0, 4, 1, 1], [3, 0, 1, 1], [3, 0, 8, 1], [2, 1, 1, 7], [2, 1, 3, 7], [1, 0, 2, 6, 1]]
-// Castle testing
+// pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
 //  ---------------------------------------------------------------------------------------- Board Funcs
 function DrawPiecesProportionally() {
     // Takes the pieces array and creates pieces accordingly.
@@ -1253,7 +1252,7 @@ function PromotionSequence(pnum: number, team: number) {
     }
     
     let promotionRing = sprites.create(assets.image`promotionChooser`)
-    animation.runImageAnimation(promotionRing, assets.animation`promotionChooserAppear`, 100, false)
+    animation.runImageAnimation(promotionRing, assets.animation`promotionChooserAppear`, 200, true)
     let promotionBishop = sprites.create(CalPieceSprite(2, team))
     let promotionRook = sprites.create(CalPieceSprite(3, team))
     let promotionKnight = sprites.create(CalPieceSprite(4, team))
@@ -1300,8 +1299,8 @@ function PromotionSequence(pnum: number, team: number) {
         promotionRing.destroy()
         selector.setImage(assets.image`selector`)
         SetPositionOnBoard(selector, pieces[pnum][2], pieces[pnum][3])
-        CreateTempSprite(700, assets.animation`promotionChosen`, pieces[pnum][2], pieces[pnum][3], 100, 0, 0, 2, true)
-        SafeAnimPause(700)
+        CreateTempSprite(1000, assets.animation`promotionChosen`, pieces[pnum][2], pieces[pnum][3], 100, 0, 0, 2, true)
+        SafeAnimPause(1000)
         BindAll()
         CheckForChecks()
     })
@@ -1526,9 +1525,9 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
                         deadPiecesOffsetBlack += 2
                     }
                     
-                    pieces[i][2] = 10 + whoseTurn * 2 + currentOffset
+                    pieces[i][2] = 10 + whoseTurn * 2
                     pieces[i][3] = 4
-                    SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3])
+                    SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3], false, 0, currentOffset)
                     break
                 }
                 

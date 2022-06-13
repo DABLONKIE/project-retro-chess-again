@@ -98,7 +98,7 @@ pieces = [
     [5, 1, 5, 8]]
 
 #pieces = [[1,0,6,6,1],[6,1,4,6]]  #Check testing
-pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
+#pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
     global pieceAssetReference, piecesSprites
@@ -811,7 +811,7 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
     if team == 0: animation.run_image_animation(piecesSprites[pnum], assets.animation("promotionBegunWhite"), 50, False)
     if team == 1: animation.run_image_animation(piecesSprites[pnum], assets.animation("promotionBegunBlack"), 50, False)
     promotionRing = sprites.create(assets.image("""promotionChooser"""))
-    animation.run_image_animation(promotionRing, assets.animation("""promotionChooserAppear"""), 100, False)
+    animation.run_image_animation(promotionRing, assets.animation("""promotionChooserAppear"""), 200, True)
     promotionBishop = sprites.create(CalPieceSprite(2, team))
     promotionRook = sprites.create(CalPieceSprite(3, team))
     promotionKnight = sprites.create(CalPieceSprite(4, team))
@@ -852,8 +852,8 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
         promotionRing.destroy()
         selector.set_image(assets.image("""selector"""))
         SetPositionOnBoard(selector, pieces[pnum][2],pieces[pnum][3])
-        CreateTempSprite(700,assets.animation("""promotionChosen"""),pieces[pnum][2],pieces[pnum][3],100, 0, 0, 2, True)
-        SafeAnimPause(700)
+        CreateTempSprite(1000,assets.animation("""promotionChosen"""),pieces[pnum][2],pieces[pnum][3],100, 0, 0, 2, True)
+        SafeAnimPause(1000)
         BindAll()
         CheckForChecks()
     controller.up.on_event(ControllerButtonEvent.PRESSED, GoUpBishop)
@@ -1031,9 +1031,9 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
                         currentOffset = deadPiecesOffsetBlack
                         deadPiecesOffsetBlack += 2
                     
-                    pieces[i][2] = 10 + (whoseTurn * 2) + currentOffset
+                    pieces[i][2] = 10 + (whoseTurn * 2)
                     pieces[i][3] = 4
-                    SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3])
+                    SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3], False, 0, currentOffset)
                     break
         if swapPlace:
             for i in range(len(pieces)):
