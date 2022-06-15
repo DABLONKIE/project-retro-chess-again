@@ -98,7 +98,7 @@ pieces = [
     [5, 1, 5, 8]]
 
 #pieces = [[5,0,4,4],[6,1,3,5,1],[1,0,4,5,1],[1,0,8,1,1]]  #Check testing
-#pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
+#pieces = [[1,0,6,6,1],[6,1,4,6]]  #Check testing
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
     global pieceAssetReference, piecesSprites
