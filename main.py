@@ -97,7 +97,7 @@ pieces = [
     [6, 1, 4, 8, 1],
     [5, 1, 5, 8]]
 
-#pieces = [[1,0,6,6,1],[6,1,4,6]]  #Check testing
+pieces = [[5,0,4,4],[6,1,3,5,1],[1,0,4,5,1],[1,0,8,1,1]]  #Check testing
 #pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
@@ -358,8 +358,9 @@ def CalculateValidSpaces(pieceNum, draw = False, arrayType = 0): #Calculates mov
         for a in range(len(pieceValidKillSpacesCheckAll)):
             for b in range(len(pieceValidSpaces)):
                 if(pieceValidKillSpacesCheckAll[a][0] == pieceValidSpaces[b][0] and pieceValidKillSpacesCheckAll[a][1] == pieceValidSpaces[b][1]):
-                    if draw: CreateTempSprite(750, assets.animation("""invalidSpaceAnim"""), pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 40, 0, 0, 10, True)
+                    if draw: CreateTempSprite(600, assets.animation("""invalidSpaceAnim"""), pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 40, 0, 0, 10, True)
                     pieceValidSpaces.remove_at(b)
+        #pieceValidKillSpacesCheckAll = []
     # Checking for invalid spaces (nonlinear = base check, linear = failsafe )
     piecesToCheck = len(pieces)
     piecesChecked = 0
@@ -545,128 +546,135 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
         killSpacesFound = True
         for i in range(8): #right
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x + g
             estimateY = y
             for b in range(len(pieces)): #occupancy check
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
                 if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #left
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x - g
             estimateY = y
             for b in range(len(pieces)): #occupancy check
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
                 if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #down
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x
             estimateY = y - g
             for b in range(len(pieces)): #occupancy check
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
                 if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #up
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x
             estimateY = y + g
             for b in range(len(pieces)): #occupancy check
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
                 if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #right up
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x + g
             estimateY = y + g
             for b in range(len(pieces)): #occupancy check
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
                 if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #left up
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x - g
             estimateY = y + g
             for b in range(len(pieces)): #occupancy check
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
                 if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #right down
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x + g
             estimateY = y - g
             for b in range(len(pieces)): #occupancy check
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
                 if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #left down
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x - g
             estimateY = y - g
             for b in range(len(pieces)): #occupancy check
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
                 if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
     #King - 6 - nonlinear
     elif pieces[pieceNum][0] == 6:
         killSpacesFound = True
         pieceValidKillSpacesToCheck = [[x, y + 1], [x + 1, y + 1], [x + 1, y], [x + 1, y - 1], [x, y - 1], [x - 1, y - 1], [x - 1, y], [x - 1, y + 1]]
+        if not forCheck:
+            GetAllAttacksOfEnemies(whoseTurn)
+            for a in range(len(pieceValidKillSpacesCheckAll)):
+                for b in range(len(pieceValidKillSpacesToCheck)):
+                    if(pieceValidKillSpacesCheckAll[a][0] == pieceValidKillSpacesToCheck[b][0] and pieceValidKillSpacesCheckAll[a][1] == pieceValidKillSpacesToCheck[b][1]):
+                        if draw: CreateTempSprite(600, assets.animation("""invalidSpaceAnim"""), pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 40, 0, 0, 10, True)
+                        pieceValidKillSpacesToCheck.remove_at(b)
     if killSpacesFound:
         pass
     else:
@@ -774,8 +782,8 @@ def GetAllAttacksOfEnemies(recievingTeam): #Get ALL attack spaces of enemies for
     pieceValidKillSpacesCheckAll = []
     for i in range(pieces.length):
         if pieces[i][1] != recievingTeam:
-            print("GetAllAttacksOfEnemies-RunningKillSpaceFor:"+pieces[i][0])
-            CalculateKillSpaces(i, False, 2, True)
+            #print("GetAllAttacksOfEnemies-RunningKillSpaceFor:"+pieces[i][0])
+            CalculateKillSpaces(i, False, 2, True, True)
 def CanKingMove(): #Returns a TRUE or FALSE depending if the king has valid moves/kills.
     global pieces, whoseTurn, whoseTurnInvert
     kingID = 0
