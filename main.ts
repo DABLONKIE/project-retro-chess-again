@@ -84,6 +84,7 @@ function CalculateValidSpaces(pieceNum: number, draw: boolean = false, arrayType
     let estimateY: number;
     let b: number;
     let a: number;
+    let pieceValidKillSpacesCheckAll: number[][];
     // Calculates move spaces for the specified piece.
     
     let validSpacesFound = false
@@ -465,7 +466,7 @@ function CalculateValidSpaces(pieceNum: number, draw: boolean = false, arrayType
             for (b = 0; b < pieceValidSpaces.length; b++) {
                 if (pieceValidKillSpacesCheckAll[a][0] == pieceValidSpaces[b][0] && pieceValidKillSpacesCheckAll[a][1] == pieceValidSpaces[b][1]) {
                     if (draw) {
-                        CreateTempSprite(750, assets.animation`invalidSpaceAnim`, pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 40, 0, 0, 10, true)
+                        CreateTempSprite(600, assets.animation`invalidSpaceAnim`, pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 40, 0, 0, 10, true)
                     }
                     
                     pieceValidSpaces.removeAt(b)
@@ -473,6 +474,7 @@ function CalculateValidSpaces(pieceNum: number, draw: boolean = false, arrayType
                 
             }
         }
+        pieceValidKillSpacesCheckAll = []
     }
     
     //  Checking for invalid spaces (nonlinear = base check, linear = failsafe )
@@ -521,10 +523,6 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
     let estimateY: number;
     let b: number;
     // Calculates the available kills for the specified piece.
-    
-    if (arrayType != 0) {
-        console.log("CalculateKillSpaces-arrayType-" + arrayType)
-    }
     
     // eliminar
     let pieceValidKillSpacesToCheck : number[][] = []
@@ -791,15 +789,15 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         for (i = 0; i < 8; i++) {
             // right
             OccupiedSpace = false
-            if (bypassCheck) {
-                OccupiedSpace = true
-            }
-            
             g = i + 1
             estimateX = x + g
             estimateY = y
             for (b = 0; b < pieces.length; b++) {
                 // occupancy check
+                if (bypassCheck) {
+                    pieceValidKillSpacesToCheck.push([estimateX, estimateY])
+                }
+                
                 if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
                     OccupiedSpace = true
                 }
@@ -808,10 +806,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
             if (OccupiedSpace) {
                 killSpacesFound = true
                 pieceValidKillSpacesToCheck.push([estimateX, estimateY])
-                if (!bypassCheck) {
-                    break
-                }
-                
+                break
             } else {
                 
             }
@@ -820,15 +815,15 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         for (i = 0; i < 8; i++) {
             // left
             OccupiedSpace = false
-            if (bypassCheck) {
-                OccupiedSpace = true
-            }
-            
             g = i + 1
             estimateX = x - g
             estimateY = y
             for (b = 0; b < pieces.length; b++) {
                 // occupancy check
+                if (bypassCheck) {
+                    pieceValidKillSpacesToCheck.push([estimateX, estimateY])
+                }
+                
                 if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
                     OccupiedSpace = true
                 }
@@ -837,10 +832,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
             if (OccupiedSpace) {
                 killSpacesFound = true
                 pieceValidKillSpacesToCheck.push([estimateX, estimateY])
-                if (!bypassCheck) {
-                    break
-                }
-                
+                break
             } else {
                 
             }
@@ -849,15 +841,15 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         for (i = 0; i < 8; i++) {
             // down
             OccupiedSpace = false
-            if (bypassCheck) {
-                OccupiedSpace = true
-            }
-            
             g = i + 1
             estimateX = x
             estimateY = y - g
             for (b = 0; b < pieces.length; b++) {
                 // occupancy check
+                if (bypassCheck) {
+                    pieceValidKillSpacesToCheck.push([estimateX, estimateY])
+                }
+                
                 if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
                     OccupiedSpace = true
                 }
@@ -866,10 +858,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
             if (OccupiedSpace) {
                 killSpacesFound = true
                 pieceValidKillSpacesToCheck.push([estimateX, estimateY])
-                if (!bypassCheck) {
-                    break
-                }
-                
+                break
             } else {
                 
             }
@@ -878,15 +867,15 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         for (i = 0; i < 8; i++) {
             // up
             OccupiedSpace = false
-            if (bypassCheck) {
-                OccupiedSpace = true
-            }
-            
             g = i + 1
             estimateX = x
             estimateY = y + g
             for (b = 0; b < pieces.length; b++) {
                 // occupancy check
+                if (bypassCheck) {
+                    pieceValidKillSpacesToCheck.push([estimateX, estimateY])
+                }
+                
                 if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
                     OccupiedSpace = true
                 }
@@ -895,10 +884,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
             if (OccupiedSpace) {
                 killSpacesFound = true
                 pieceValidKillSpacesToCheck.push([estimateX, estimateY])
-                if (!bypassCheck) {
-                    break
-                }
-                
+                break
             } else {
                 
             }
@@ -907,15 +893,15 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         for (i = 0; i < 8; i++) {
             // right up
             OccupiedSpace = false
-            if (bypassCheck) {
-                OccupiedSpace = true
-            }
-            
             g = i + 1
             estimateX = x + g
             estimateY = y + g
             for (b = 0; b < pieces.length; b++) {
                 // occupancy check
+                if (bypassCheck) {
+                    pieceValidKillSpacesToCheck.push([estimateX, estimateY])
+                }
+                
                 if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
                     OccupiedSpace = true
                 }
@@ -924,10 +910,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
             if (OccupiedSpace) {
                 killSpacesFound = true
                 pieceValidKillSpacesToCheck.push([estimateX, estimateY])
-                if (!bypassCheck) {
-                    break
-                }
-                
+                break
             } else {
                 
             }
@@ -936,15 +919,15 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         for (i = 0; i < 8; i++) {
             // left up
             OccupiedSpace = false
-            if (bypassCheck) {
-                OccupiedSpace = true
-            }
-            
             g = i + 1
             estimateX = x - g
             estimateY = y + g
             for (b = 0; b < pieces.length; b++) {
                 // occupancy check
+                if (bypassCheck) {
+                    pieceValidKillSpacesToCheck.push([estimateX, estimateY])
+                }
+                
                 if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
                     OccupiedSpace = true
                 }
@@ -953,10 +936,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
             if (OccupiedSpace) {
                 killSpacesFound = true
                 pieceValidKillSpacesToCheck.push([estimateX, estimateY])
-                if (!bypassCheck) {
-                    break
-                }
-                
+                break
             } else {
                 
             }
@@ -965,15 +945,15 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         for (i = 0; i < 8; i++) {
             // right down
             OccupiedSpace = false
-            if (bypassCheck) {
-                OccupiedSpace = true
-            }
-            
             g = i + 1
             estimateX = x + g
             estimateY = y - g
             for (b = 0; b < pieces.length; b++) {
                 // occupancy check
+                if (bypassCheck) {
+                    pieceValidKillSpacesToCheck.push([estimateX, estimateY])
+                }
+                
                 if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
                     OccupiedSpace = true
                 }
@@ -982,10 +962,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
             if (OccupiedSpace) {
                 killSpacesFound = true
                 pieceValidKillSpacesToCheck.push([estimateX, estimateY])
-                if (!bypassCheck) {
-                    break
-                }
-                
+                break
             } else {
                 
             }
@@ -994,15 +971,15 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         for (i = 0; i < 8; i++) {
             // left down
             OccupiedSpace = false
-            if (bypassCheck) {
-                OccupiedSpace = true
-            }
-            
             g = i + 1
             estimateX = x - g
             estimateY = y - g
             for (b = 0; b < pieces.length; b++) {
                 // occupancy check
+                if (bypassCheck) {
+                    pieceValidKillSpacesToCheck.push([estimateX, estimateY])
+                }
+                
                 if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
                     OccupiedSpace = true
                 }
@@ -1011,10 +988,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
             if (OccupiedSpace) {
                 killSpacesFound = true
                 pieceValidKillSpacesToCheck.push([estimateX, estimateY])
-                if (!bypassCheck) {
-                    break
-                }
-                
+                break
             } else {
                 
             }
@@ -1024,15 +998,33 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         // King - 6 - nonlinear
         killSpacesFound = true
         pieceValidKillSpacesToCheck = [[x, y + 1], [x + 1, y + 1], [x + 1, y], [x + 1, y - 1], [x, y - 1], [x - 1, y - 1], [x - 1, y], [x - 1, y + 1]]
+        if (!forCheck) {
+            GetAllAttacksOfEnemies(whoseTurn)
+            for (let a = 0; a < pieceValidKillSpacesCheckAll.length; a++) {
+                for (b = 0; b < pieceValidKillSpacesToCheck.length; b++) {
+                    if (pieceValidKillSpacesCheckAll[a][0] == pieceValidKillSpacesToCheck[b][0] && pieceValidKillSpacesCheckAll[a][1] == pieceValidKillSpacesToCheck[b][1]) {
+                        if (draw) {
+                            CreateTempSprite(600, assets.animation`invalidSpaceAnim`, pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 40, 0, 0, 10, true)
+                        }
+                        
+                        pieceValidKillSpacesToCheck.removeAt(b)
+                    }
+                    
+                }
+            }
+        }
+        
+        pieceValidKillSpacesCheckAll = []
     }
     
+    // ---
     if (killSpacesFound) {
         
     } else {
         return false
     }
     
-    let piecesToCheck = pieces.length
+    // ---
     if (!bypassCheck) {
         for (i = 0; i < pieces.length; i++) {
             for (let c = 0; c < pieceValidKillSpacesToCheck.length; c++) {
@@ -1194,8 +1186,8 @@ function GetAllAttacksOfEnemies(recievingTeam: number) {
     pieceValidKillSpacesCheckAll = []
     for (let i = 0; i < pieces.length; i++) {
         if (pieces[i][1] != recievingTeam) {
-            console.log("GetAllAttacksOfEnemies-RunningKillSpaceFor:" + pieces[i][0])
-            CalculateKillSpaces(i, false, 2, true)
+            // print("GetAllAttacksOfEnemies-RunningKillSpaceFor:"+pieces[i][0])
+            CalculateKillSpaces(i, false, 2, true, true)
         }
         
     }
@@ -1244,11 +1236,11 @@ function PromotionSequence(pnum: number, team: number) {
     
     selector.setImage(assets.image`selectorPromotion`)
     if (team == 0) {
-        animation.runImageAnimation(piecesSprites[pnum], assets.animation`promotionBegunWhite`, 50, false)
+        animation.runImageAnimation(piecesSprites[pnum], assets.animation`promotionBegunWhite`, 100, false)
     }
     
     if (team == 1) {
-        animation.runImageAnimation(piecesSprites[pnum], assets.animation`promotionBegunBlack`, 50, false)
+        animation.runImageAnimation(piecesSprites[pnum], assets.animation`promotionBegunBlack`, 100, false)
     }
     
     let promotionRing = sprites.create(assets.image`promotionChooser`)
@@ -1264,6 +1256,7 @@ function PromotionSequence(pnum: number, team: number) {
     SetPositionOnBoard(promotionKnight, pieces[pnum][2] - 1, pieces[pnum][3])
     SetPositionOnBoard(promotionQueen, pieces[pnum][2] + 1, pieces[pnum][3])
     let chosen = 0
+    SafePause(700)
     controller.up.onEvent(ControllerButtonEvent.Pressed, function GoUpBishop() {
         
         chosen = 2
