@@ -551,7 +551,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             estimateY = y
             for b in range(len(pieces)): #occupancy check
                 if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
@@ -566,7 +566,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             estimateY = y
             for b in range(len(pieces)): #occupancy check
                 if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
@@ -581,7 +581,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             estimateY = y - g
             for b in range(len(pieces)): #occupancy check
                 if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
@@ -596,7 +596,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             estimateY = y + g
             for b in range(len(pieces)): #occupancy check
                 if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
@@ -611,7 +611,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             estimateY = y + g
             for b in range(len(pieces)): #occupancy check
                 if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
@@ -626,7 +626,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             estimateY = y + g
             for b in range(len(pieces)): #occupancy check
                 if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
@@ -641,7 +641,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             estimateY = y - g
             for b in range(len(pieces)): #occupancy check
                 if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
@@ -656,7 +656,7 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
             estimateY = y - g
             for b in range(len(pieces)): #occupancy check
                 if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
@@ -679,7 +679,6 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
         pass
     else:
         return False
-    piecesToCheck = len(pieces)
 
     if not bypassCheck:
         for i in range(len(pieces)):
@@ -819,7 +818,7 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
     if team == 0: animation.run_image_animation(piecesSprites[pnum], assets.animation("promotionBegunWhite"), 50, False)
     if team == 1: animation.run_image_animation(piecesSprites[pnum], assets.animation("promotionBegunBlack"), 50, False)
     promotionRing = sprites.create(assets.image("""promotionChooser"""))
-    animation.run_image_animation(promotionRing, assets.animation("""promotionChooserAppear"""), 200, True)
+    animation.run_image_animation(promotionRing, assets.animation("""promotionChooserAppear"""), 100, False)
     promotionBishop = sprites.create(CalPieceSprite(2, team))
     promotionRook = sprites.create(CalPieceSprite(3, team))
     promotionKnight = sprites.create(CalPieceSprite(4, team))

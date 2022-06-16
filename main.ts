@@ -802,7 +802,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
                     pieceValidKillSpacesToCheck.push([estimateX, estimateY])
                 }
                 
-                if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
+                if (estimateX == pieces[b][2] && estimateY == pieces[b][3] && !(pieces[b][0] == 6 && pieces[b][1] == whoseTurn)) {
                     OccupiedSpace = true
                 }
                 
@@ -831,7 +831,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
                     pieceValidKillSpacesToCheck.push([estimateX, estimateY])
                 }
                 
-                if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
+                if (estimateX == pieces[b][2] && estimateY == pieces[b][3] && !(pieces[b][0] == 6 && pieces[b][1] == whoseTurn)) {
                     OccupiedSpace = true
                 }
                 
@@ -860,7 +860,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
                     pieceValidKillSpacesToCheck.push([estimateX, estimateY])
                 }
                 
-                if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
+                if (estimateX == pieces[b][2] && estimateY == pieces[b][3] && !(pieces[b][0] == 6 && pieces[b][1] == whoseTurn)) {
                     OccupiedSpace = true
                 }
                 
@@ -889,7 +889,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
                     pieceValidKillSpacesToCheck.push([estimateX, estimateY])
                 }
                 
-                if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
+                if (estimateX == pieces[b][2] && estimateY == pieces[b][3] && !(pieces[b][0] == 6 && pieces[b][1] == whoseTurn)) {
                     OccupiedSpace = true
                 }
                 
@@ -918,7 +918,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
                     pieceValidKillSpacesToCheck.push([estimateX, estimateY])
                 }
                 
-                if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
+                if (estimateX == pieces[b][2] && estimateY == pieces[b][3] && !(pieces[b][0] == 6 && pieces[b][1] == whoseTurn)) {
                     OccupiedSpace = true
                 }
                 
@@ -947,7 +947,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
                     pieceValidKillSpacesToCheck.push([estimateX, estimateY])
                 }
                 
-                if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
+                if (estimateX == pieces[b][2] && estimateY == pieces[b][3] && !(pieces[b][0] == 6 && pieces[b][1] == whoseTurn)) {
                     OccupiedSpace = true
                 }
                 
@@ -976,7 +976,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
                     pieceValidKillSpacesToCheck.push([estimateX, estimateY])
                 }
                 
-                if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
+                if (estimateX == pieces[b][2] && estimateY == pieces[b][3] && !(pieces[b][0] == 6 && pieces[b][1] == whoseTurn)) {
                     OccupiedSpace = true
                 }
                 
@@ -1005,7 +1005,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
                     pieceValidKillSpacesToCheck.push([estimateX, estimateY])
                 }
                 
-                if (estimateX == pieces[b][2] && estimateY == pieces[b][3]) {
+                if (estimateX == pieces[b][2] && estimateY == pieces[b][3] && !(pieces[b][0] == 6 && pieces[b][1] == whoseTurn)) {
                     OccupiedSpace = true
                 }
                 
@@ -1050,7 +1050,6 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
         return false
     }
     
-    let piecesToCheck = pieces.length
     if (!bypassCheck) {
         for (i = 0; i < pieces.length; i++) {
             for (let c = 0; c < pieceValidKillSpacesToCheck.length; c++) {
@@ -1270,7 +1269,7 @@ function PromotionSequence(pnum: number, team: number) {
     }
     
     let promotionRing = sprites.create(assets.image`promotionChooser`)
-    animation.runImageAnimation(promotionRing, assets.animation`promotionChooserAppear`, 200, true)
+    animation.runImageAnimation(promotionRing, assets.animation`promotionChooserAppear`, 100, false)
     let promotionBishop = sprites.create(CalPieceSprite(2, team))
     let promotionRook = sprites.create(CalPieceSprite(3, team))
     let promotionKnight = sprites.create(CalPieceSprite(4, team))
