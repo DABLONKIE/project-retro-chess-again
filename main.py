@@ -61,43 +61,44 @@ deadPiecesOffsetBlack = 0
 # Original Chess Positions
 # 0: 1=pawn  2=bishop  3=rook 4=knight 5=queen 6=king
 # 1: 0=white 1=black
-# 2 & 3: numbers are coordinates. Letters and numbers respectively.
-# 4: special tag, for example, pawn not moved, king castlin
+# 2,3: numbers are coordinates. Letters and numbers respectively.
+# 4: if disabled (1), it will not be considered. 
+# 5: special tag, for example, pawn not moved, king castlin
 pieces = [
-    [1, 0, 1, 2, 1],
-    [1, 0, 2, 2, 1],
-    [1, 0, 3, 2, 1],
-    [1, 0, 4, 2, 1],
-    [1, 0, 5, 2, 1],
-    [1, 0, 6, 2, 1],
-    [1, 0, 7, 2, 1],
-    [1, 0, 8, 2, 1],
-    [3, 0, 1, 1],
-    [3, 0, 8, 1],
-    [4, 0, 2, 1],
-    [4, 0, 7, 1],
-    [2, 0, 3, 1],
-    [2, 0, 6, 1],
-    [6, 0, 4, 1, 1],
-    [5, 0, 5, 1],
-    [1, 1, 1, 7, 1],
-    [1, 1, 2, 7, 1],
-    [1, 1, 3, 7, 1],
-    [1, 1, 4, 7, 1],
-    [1, 1, 5, 7, 1],
-    [1, 1, 6, 7, 1],
-    [1, 1, 7, 7, 1],
-    [1, 1, 8, 7, 1],
-    [3, 1, 1, 8],
-    [3, 1, 8, 8],
-    [4, 1, 2, 8],
-    [4, 1, 7, 8],
-    [2, 1, 3, 8],
-    [2, 1, 6, 8],
-    [6, 1, 4, 8, 1],
-    [5, 1, 5, 8]]
+    [1, 0, 1, 2, 0, 1],
+    [1, 0, 2, 2, 0, 1],
+    [1, 0, 3, 2, 0, 1],
+    [1, 0, 4, 2, 0, 1],
+    [1, 0, 5, 2, 0, 1],
+    [1, 0, 6, 2, 0, 1],
+    [1, 0, 7, 2, 0, 1],
+    [1, 0, 8, 2, 0, 1],
+    [3, 0, 1, 1, 0],
+    [3, 0, 8, 1, 0],
+    [4, 0, 2, 1, 0],
+    [4, 0, 7, 1, 0],
+    [2, 0, 3, 1, 0],
+    [2, 0, 6, 1, 0],
+    [6, 0, 4, 1, 0, 1],
+    [5, 0, 5, 1, 0],
+    [1, 1, 1, 7, 0, 1],
+    [1, 1, 2, 7, 0, 1],
+    [1, 1, 3, 7, 0, 1],
+    [1, 1, 4, 7, 0, 1],
+    [1, 1, 5, 7, 0, 1],
+    [1, 1, 6, 7, 0, 1],
+    [1, 1, 7, 7, 0, 1],
+    [1, 1, 8, 7, 0, 1],
+    [3, 1, 1, 8, 0],
+    [3, 1, 8, 8, 0],
+    [4, 1, 2, 8, 0],
+    [4, 1, 7, 8, 0],
+    [2, 1, 3, 8, 0],
+    [2, 1, 6, 8, 0],
+    [6, 1, 4, 8, 0, 1],
+    [5, 1, 5, 8, 0]]
 
-pieces = [[5,0,4,4],[6,1,3,5,1],[1,0,4,5,1],[1,0,8,1,1]]  #Check testing
+pieces = [[5,0,4,4,0],[6,1,3,5,0,1],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
 #pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
@@ -121,20 +122,23 @@ def CalculateValidSpaces(pieceNum, draw = False, arrayType = 0): #Calculates mov
     x = pieces[pieceNum][2]
     y = pieces[pieceNum][3]
     print("CalculateValidSpaces-started")
+    if pieces[pieceNum][4] == 1:
+        print("CalculateValidSpaces-Piece is disabled, skipping.")
+        return False
     #Pawn - 1 - nonlinear
     if pieces[pieceNum][0] == 1:
         validSpacesFound = True
         if pieces[pieceNum][1] == 0:
-            if pieces[pieceNum][4] == 1:
+            if pieces[pieceNum][5] == 1:
                 pawnFirstMove = True
                 pieceValidSpaces = [[x, y + 1], [x, y + 2]]
-            elif pieces[pieceNum][4] == 0:
+            elif pieces[pieceNum][5] == 0:
                 pieceValidSpaces = [[x, y + 1]]
         elif pieces[pieceNum][1] == 1:
-            if pieces[pieceNum][4] == 1:
+            if pieces[pieceNum][5] == 1:
                 pawnFirstMove = True
                 pieceValidSpaces = [[x, y - 1], [x, y - 2]]
-            elif pieces[pieceNum][4] == 0:
+            elif pieces[pieceNum][5] == 0:
                 pieceValidSpaces = [[x, y - 1]]
         for i in range(len(pieces)):
             if pieces[i][2] == pieceValidSpaces[0][0] and pieces[i][3] == pieceValidSpaces[0][1]:
@@ -394,8 +398,12 @@ def CalculateValidSpaces(pieceNum, draw = False, arrayType = 0): #Calculates mov
     return validSpacesFound
 def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = False, forCheck = False): #Calculates the available kills for the specified piece.
     global pieces, pieceValidKillSpaces, pieceValidKillSprites, whoseTurn, pieceValidKillSpacesCheckMate, pieceValidKillSpacesCheckAll,killSpaceAssetRefernce
+    print("CalculateKillSpaces-Initialized")
     if arrayType != 0:
         print("CalculateKillSpaces-arrayType-"+arrayType)
+    if pieces[pieceNum][4] == 1:
+        print("CalculateKillSpaces-Piece is disabled, skipping.")
+        return False
     #eliminar
     pieceValidKillSpacesToCheck: List[List[number]] = []
     pieceValidKillSpacesChecked: List[List[number]] = []
@@ -726,7 +734,7 @@ def CalculateCastleSpaces(pieceNum, draw = False):
     if pieces[pieceNum][0] != 6:
         print("CalculateCastleSpaces-Cancelled-WrongPiece")
         return False
-    if pieces[pieceNum][1] == 0 and pieces[pieceNum][4] == 1:
+    if pieces[pieceNum][1] == 0 and pieces[pieceNum][5] == 1:
         for i in range(len(pieces)):
             if pieces[i][1] == 0:
                 if pieces[i][0] == 3:
@@ -759,8 +767,8 @@ def CheckForChecks(): #Is the king in peril?
             print("CheckForChecks-KingFound")
     GetAllAttacksOfEnemies(whoseTurn)
     for i in range(len(pieceValidKillSpacesCheckAll)):
-        print("CheckForChecks-Running X "+pieceValidKillSpacesCheckAll[i][0])
-        print("CheckForChecks-Running Y "+pieceValidKillSpacesCheckAll[i][1])
+        #print("CheckForChecks-Running X "+pieceValidKillSpacesCheckAll[i][0])
+        #print("CheckForChecks-Running Y "+pieceValidKillSpacesCheckAll[i][1])
         if pieces[kingID][2] == pieceValidKillSpacesCheckAll[i][0] and pieces[kingID][3] == pieceValidKillSpacesCheckAll[i][1]:
             print("CheckForChecks-King" + whoseTurn + " is in peril!")
             checked = whoseTurn
@@ -863,6 +871,7 @@ def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code ab
         SafeAnimPause(1000)
         BindAll()
         CheckForChecks()
+    SafePause(500)
     controller.up.on_event(ControllerButtonEvent.PRESSED, GoUpBishop)
     controller.down.on_event(ControllerButtonEvent.PRESSED, GoDownRook)
     controller.left.on_event(ControllerButtonEvent.PRESSED, GoLeftKnight)
@@ -1026,7 +1035,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
         controller.B.on_event(ControllerButtonEvent.PRESSED, None)
         piecesSprites[selectorData[2]].z = 0
         if pawnFirstMove and not bypassCheck:
-            pieces[selectorData[2]][4] = 0
+            pieces[selectorData[2]][5] = 0
         if killingPlace:
             for i in range(len(pieces)):
                 if pieces[i][2] == selectorData[0] and pieces[i][3] == selectorData[1]:
@@ -1037,7 +1046,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
                     elif whoseTurn == 1: 
                         currentOffset = deadPiecesOffsetBlack
                         deadPiecesOffsetBlack += 2
-                    
+                    pieces[i][4] = 1 
                     pieces[i][2] = 10 + (whoseTurn * 2)
                     pieces[i][3] = 4
                     SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3], False, 0, currentOffset)
@@ -1054,8 +1063,8 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
                 promotion = True
             if pieces[selectorData[2]][1] == 1 and pieces[selectorData[2]][3] == 1:
                 promotion = True
-        if pieces[selectorData[2]][4] == 1 and not bypassCheck:
-            pieces[selectorData[2]][4] = 0
+        if pieces[selectorData[2]][5] == 1 and not bypassCheck:
+            pieces[selectorData[2]][5] = 0
         SetPositionOnBoard(piecesSprites[selectorData[2]],
             pieces[selectorData[2]][2],
             pieces[selectorData[2]][3])

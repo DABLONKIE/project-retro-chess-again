@@ -44,10 +44,11 @@ let deadPiecesOffsetBlack = 0
 //  Original Chess Positions
 //  0: 1=pawn  2=bishop  3=rook 4=knight 5=queen 6=king
 //  1: 0=white 1=black
-//  2 & 3: numbers are coordinates. Letters and numbers respectively.
-//  4: special tag, for example, pawn not moved, king castlin
-pieces = [[1, 0, 1, 2, 1], [1, 0, 2, 2, 1], [1, 0, 3, 2, 1], [1, 0, 4, 2, 1], [1, 0, 5, 2, 1], [1, 0, 6, 2, 1], [1, 0, 7, 2, 1], [1, 0, 8, 2, 1], [3, 0, 1, 1], [3, 0, 8, 1], [4, 0, 2, 1], [4, 0, 7, 1], [2, 0, 3, 1], [2, 0, 6, 1], [6, 0, 4, 1, 1], [5, 0, 5, 1], [1, 1, 1, 7, 1], [1, 1, 2, 7, 1], [1, 1, 3, 7, 1], [1, 1, 4, 7, 1], [1, 1, 5, 7, 1], [1, 1, 6, 7, 1], [1, 1, 7, 7, 1], [1, 1, 8, 7, 1], [3, 1, 1, 8], [3, 1, 8, 8], [4, 1, 2, 8], [4, 1, 7, 8], [2, 1, 3, 8], [2, 1, 6, 8], [6, 1, 4, 8, 1], [5, 1, 5, 8]]
-pieces = [[5, 0, 4, 4], [6, 1, 3, 5, 1], [1, 0, 4, 5, 1], [1, 0, 8, 1, 1]]
+//  2,3: numbers are coordinates. Letters and numbers respectively.
+//  4: if disabled (1), it will not be considered. 
+//  5: special tag, for example, pawn not moved, king castlin
+pieces = [[1, 0, 1, 2, 0, 1], [1, 0, 2, 2, 0, 1], [1, 0, 3, 2, 0, 1], [1, 0, 4, 2, 0, 1], [1, 0, 5, 2, 0, 1], [1, 0, 6, 2, 0, 1], [1, 0, 7, 2, 0, 1], [1, 0, 8, 2, 0, 1], [3, 0, 1, 1, 0], [3, 0, 8, 1, 0], [4, 0, 2, 1, 0], [4, 0, 7, 1, 0], [2, 0, 3, 1, 0], [2, 0, 6, 1, 0], [6, 0, 4, 1, 0, 1], [5, 0, 5, 1, 0], [1, 1, 1, 7, 0, 1], [1, 1, 2, 7, 0, 1], [1, 1, 3, 7, 0, 1], [1, 1, 4, 7, 0, 1], [1, 1, 5, 7, 0, 1], [1, 1, 6, 7, 0, 1], [1, 1, 7, 7, 0, 1], [1, 1, 8, 7, 0, 1], [3, 1, 1, 8, 0], [3, 1, 8, 8, 0], [4, 1, 2, 8, 0], [4, 1, 7, 8, 0], [2, 1, 3, 8, 0], [2, 1, 6, 8, 0], [6, 1, 4, 8, 0, 1], [5, 1, 5, 8, 0]]
+pieces = [[5, 0, 4, 4, 0], [6, 1, 3, 5, 0, 1], [1, 0, 4, 5, 0, 1], [1, 0, 8, 1, 0, 1]]
 // Check testing
 // pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
 //  ---------------------------------------------------------------------------------------- Board Funcs
@@ -92,22 +93,27 @@ function CalculateValidSpaces(pieceNum: number, draw: boolean = false, arrayType
     let x = pieces[pieceNum][2]
     let y = pieces[pieceNum][3]
     console.log("CalculateValidSpaces-started")
+    if (pieces[pieceNum][4] == 1) {
+        console.log("CalculateValidSpaces-Piece is disabled, skipping.")
+        return false
+    }
+    
     // Pawn - 1 - nonlinear
     if (pieces[pieceNum][0] == 1) {
         validSpacesFound = true
         if (pieces[pieceNum][1] == 0) {
-            if (pieces[pieceNum][4] == 1) {
+            if (pieces[pieceNum][5] == 1) {
                 pawnFirstMove = true
                 pieceValidSpaces = [[x, y + 1], [x, y + 2]]
-            } else if (pieces[pieceNum][4] == 0) {
+            } else if (pieces[pieceNum][5] == 0) {
                 pieceValidSpaces = [[x, y + 1]]
             }
             
         } else if (pieces[pieceNum][1] == 1) {
-            if (pieces[pieceNum][4] == 1) {
+            if (pieces[pieceNum][5] == 1) {
                 pawnFirstMove = true
                 pieceValidSpaces = [[x, y - 1], [x, y - 2]]
-            } else if (pieces[pieceNum][4] == 0) {
+            } else if (pieces[pieceNum][5] == 0) {
                 pieceValidSpaces = [[x, y - 1]]
             }
             
@@ -524,8 +530,14 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
     let b: number;
     // Calculates the available kills for the specified piece.
     
+    console.log("CalculateKillSpaces-Initialized")
     if (arrayType != 0) {
         console.log("CalculateKillSpaces-arrayType-" + arrayType)
+    }
+    
+    if (pieces[pieceNum][4] == 1) {
+        console.log("CalculateKillSpaces-Piece is disabled, skipping.")
+        return false
     }
     
     // eliminar
@@ -1125,7 +1137,7 @@ function CalculateCastleSpaces(pieceNum: number, draw: boolean = false): boolean
         return false
     }
     
-    if (pieces[pieceNum][1] == 0 && pieces[pieceNum][4] == 1) {
+    if (pieces[pieceNum][1] == 0 && pieces[pieceNum][5] == 1) {
         for (i = 0; i < pieces.length; i++) {
             if (pieces[i][1] == 0) {
                 if (pieces[i][0] == 3) {
@@ -1179,8 +1191,8 @@ function CheckForChecks() {
     }
     GetAllAttacksOfEnemies(whoseTurn)
     for (i = 0; i < pieceValidKillSpacesCheckAll.length; i++) {
-        console.log("CheckForChecks-Running X " + pieceValidKillSpacesCheckAll[i][0])
-        console.log("CheckForChecks-Running Y " + pieceValidKillSpacesCheckAll[i][1])
+        // print("CheckForChecks-Running X "+pieceValidKillSpacesCheckAll[i][0])
+        // print("CheckForChecks-Running Y "+pieceValidKillSpacesCheckAll[i][1])
         if (pieces[kingID][2] == pieceValidKillSpacesCheckAll[i][0] && pieces[kingID][3] == pieceValidKillSpacesCheckAll[i][1]) {
             console.log("CheckForChecks-King" + whoseTurn + " is in peril!")
             checked = whoseTurn
@@ -1281,6 +1293,7 @@ function PromotionSequence(pnum: number, team: number) {
     SetPositionOnBoard(promotionKnight, pieces[pnum][2] - 1, pieces[pnum][3])
     SetPositionOnBoard(promotionQueen, pieces[pnum][2] + 1, pieces[pnum][3])
     let chosen = 0
+    SafePause(500)
     controller.up.onEvent(ControllerButtonEvent.Pressed, function GoUpBishop() {
         
         chosen = 2
@@ -1527,7 +1540,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         controller.B.onEvent(ControllerButtonEvent.Pressed, null)
         piecesSprites[selectorData[2]].z = 0
         if (pawnFirstMove && !bypassCheck) {
-            pieces[selectorData[2]][4] = 0
+            pieces[selectorData[2]][5] = 0
         }
         
         if (killingPlace) {
@@ -1542,6 +1555,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
                         deadPiecesOffsetBlack += 2
                     }
                     
+                    pieces[i][4] = 1
                     pieces[i][2] = 10 + whoseTurn * 2
                     pieces[i][3] = 4
                     SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3], false, 0, currentOffset)
@@ -1574,8 +1588,8 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
             
         }
         
-        if (pieces[selectorData[2]][4] == 1 && !bypassCheck) {
-            pieces[selectorData[2]][4] = 0
+        if (pieces[selectorData[2]][5] == 1 && !bypassCheck) {
+            pieces[selectorData[2]][5] = 0
         }
         
         SetPositionOnBoard(piecesSprites[selectorData[2]], pieces[selectorData[2]][2], pieces[selectorData[2]][3])
