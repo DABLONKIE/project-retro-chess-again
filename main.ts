@@ -30,10 +30,12 @@ selectorData = [4, 4, null]
 let pawnFirstMove = false
 selector = null
 turnPawn = null
+let title = null
 let colorPalletteSwitched = true
 let gamma = 0
 let chosen = 0
 let check = 0
+let buttonSelected = 0
 let swapType = 0
 let checked = 2
 // 0 = white | 1 = black | 2 = none
@@ -51,6 +53,7 @@ pieces = [[1, 0, 1, 2, 0, 1], [1, 0, 2, 2, 0, 1], [1, 0, 3, 2, 0, 1], [1, 0, 4, 
 pieces = [[5, 0, 4, 4, 0], [6, 1, 3, 5, 0, 1], [1, 0, 4, 5, 0, 1], [1, 0, 8, 1, 0, 1]]
 // Check testing
 // pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
+pieces = [[1, 0, 8, 1, 0, 1]]
 //  ---------------------------------------------------------------------------------------- Board Funcs
 function DrawPiecesProportionally() {
     // Takes the pieces array and creates pieces accordingly.
@@ -1268,6 +1271,22 @@ function Setup() {
     controller.right.onEvent(ControllerButtonEvent.Pressed, SelectorGoRIGHT)
 }
 
+function MainMenu() {
+    // Draw menu and bind menu buttons. Also it looks cool :)
+    
+    UpdateColors()
+    title = sprites.create(assets.image`title`)
+    let buttonPlay = sprites.create(assets.image`buttonPlay`)
+    buttonPlay.x = 20
+    buttonPlay.y = 50
+    let buttonSettings = sprites.create(assets.image`buttonSettings`)
+    buttonSettings.x = 27
+    buttonSettings.y = 65
+    title.y = 20
+    animation.runImageAnimation(title, assets.animation`titleAnim`, 1000, true)
+    scene.setBackgroundImage(assets.image`mainMenu`)
+}
+
 function PromotionSequence(pnum: number, team: number) {
     // Sequence of promoting a pawn, mostly code about chosing the piece
     
@@ -1788,4 +1807,4 @@ function CalPieceSprite(pieceClass: number, team: number): Image {
 
 //  ---------------------------------------------------------------------------------------- Starting Code
 controller.menu.onEvent(ControllerButtonEvent.Pressed, null)
-Setup()
+MainMenu()

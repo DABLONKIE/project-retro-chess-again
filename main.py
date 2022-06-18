@@ -32,10 +32,12 @@ selectorData = [4, 4, None]
 pawnFirstMove = False
 selector = None
 turnPawn = None
+title = None
 colorPalletteSwitched = True
 gamma = 0
 chosen = 0
 check = 0
+buttonSelected = 0
 swapType = 0
 checked = 2 #0 = white | 1 = black | 2 = none
 pieceAssetReference = [
@@ -100,6 +102,7 @@ pieces = [
 
 pieces = [[5,0,4,4,0],[6,1,3,5,0,1],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
 #pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
+pieces = [[1,0,8,1,0,1]]
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
     global pieceAssetReference, piecesSprites
@@ -820,6 +823,19 @@ def Setup(): #Initialize Commands, game is inert without them.
     controller.down.on_event(ControllerButtonEvent.PRESSED, SelectorGoDOWN)
     controller.left.on_event(ControllerButtonEvent.PRESSED, SelectorGoLEFT)
     controller.right.on_event(ControllerButtonEvent.PRESSED, SelectorGoRIGHT)
+def MainMenu(): #Draw menu and bind menu buttons. Also it looks cool :)
+    global title
+    UpdateColors()
+    title = sprites.create(assets.image("""title"""))
+    buttonPlay = sprites.create(assets.image("""buttonPlay"""))
+    buttonPlay.x = 20
+    buttonPlay.y = 50
+    buttonSettings = sprites.create(assets.image("""buttonSettings"""))
+    buttonSettings.x = 27
+    buttonSettings.y = 65
+    title.y = 20
+    animation.run_image_animation(title, assets.animation("""titleAnim"""), 1000, True)
+    scene.set_background_image(assets.image("""mainMenu"""))
 def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code about chosing the piece
     global piecesSprites, pieces
     selector.set_image(assets.image("""selectorPromotion"""))
@@ -1215,5 +1231,6 @@ def CalPieceSprite(pieceClass : number, team): #Get the sprite according to clas
 
 # ---------------------------------------------------------------------------------------- Starting Code
 controller.menu.on_event(ControllerButtonEvent.PRESSED, None)
-Setup()
+MainMenu()
+#Setup()
 
