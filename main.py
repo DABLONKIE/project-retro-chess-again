@@ -366,16 +366,8 @@ def CalculateValidSpaces(pieceNum, draw = False, arrayType = 0): #Calculates mov
     elif pieces[pieceNum][0] == 6:
         validSpacesFound = True
         pieceValidSpaces = [[x, y + 1], [x + 1, y + 1], [x + 1, y], [x + 1, y - 1], [x, y - 1], [x - 1, y - 1], [x - 1, y], [x - 1, y + 1]]
-        GetAllAttacksOfEnemies(whoseTurn)
-        for a in range(len(pieceValidKillSpacesCheckAll)):
-            for b in range(len(pieceValidSpaces)):
-                if(pieceValidKillSpacesCheckAll[a][0] == pieceValidSpaces[b][0] and pieceValidKillSpacesCheckAll[a][1] == pieceValidSpaces[b][1]):
-                    if draw: CreateTempSprite(600, assets.animation("""invalidSpaceAnim"""), pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 40, 0, 0, 10, True)
-                    pieceValidSpaces.remove_at(b)
-        #pieceValidKillSpacesCheckAll = []
+        
     # Checking for invalid spaces (nonlinear = base check, linear = failsafe )
-    piecesToCheck = len(pieces)
-    piecesChecked = 0
 
     if noSpaces or len(pieceValidSpaces) == 0: #Check 1
         return False
@@ -384,6 +376,14 @@ def CalculateValidSpaces(pieceNum, draw = False, arrayType = 0): #Calculates mov
         for b in range(len(pieceValidSpaces)):
             if(pieces[a][2] == pieceValidSpaces[b][0] and pieces[a][3] == pieceValidSpaces[b][1]) or IsNumOutOfBounds(pieceValidSpaces[b][0]) or IsNumOutOfBounds(pieceValidSpaces[b][1]):
                 pieceValidSpaces.remove_at(b)
+    
+    if pieces[pieceNum][0] == 6:
+        GetAllAttacksOfEnemies(whoseTurn)
+        for a in range(len(pieceValidKillSpacesCheckAll)):
+            for b in range(len(pieceValidSpaces)):
+                if(pieceValidKillSpacesCheckAll[a][0] == pieceValidSpaces[b][0] and pieceValidKillSpacesCheckAll[a][1] == pieceValidSpaces[b][1]):
+                    if draw: CreateTempSprite(600, assets.animation("""invalidSpaceAnim"""), pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 40, 0, 0, 10, True)
+                    pieceValidSpaces.remove_at(b)
     
     if noSpaces or len(pieceValidSpaces) == 0: #Check 2
         return False
@@ -432,62 +432,62 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
         killSpacesFound = True
         for i in range(8): #right up
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x + g
             estimateY = y + g
             for b in range(len(pieces)): #occupancy check
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #left up
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x - g
             estimateY = y + g
             for b in range(len(pieces)): #occupancy check
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #right down
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x + g
             estimateY = y - g
             for b in range(len(pieces)): #occupancy check
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #left down
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x - g
             estimateY = y - g
             for b in range(len(pieces)): #occupancy check
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
     #Rook - 3 - linear
@@ -495,62 +495,62 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
         killSpacesFound = True
         for i in range(8): #right
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x + g
             estimateY = y
             for b in range(len(pieces)): #occupancy check
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #left
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x - g
             estimateY = y
             for b in range(len(pieces)): #occupancy check
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #down
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x
             estimateY = y - g
             for b in range(len(pieces)): #occupancy check
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
         for i in range(8): #up
             OccupiedSpace = False
-            if bypassCheck: OccupiedSpace = True
             g = i + 1
             estimateX = x
             estimateY = y + g
             for b in range(len(pieces)): #occupancy check
-                if estimateX == pieces[b][2] and estimateY == pieces[b][3]:
+                if bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                if estimateX == pieces[b][2] and estimateY == pieces[b][3] and not (pieces[b][0]== 6 and pieces[b][1] == whoseTurn):
                     OccupiedSpace = True
             if OccupiedSpace:
                 killSpacesFound = True
-                pieceValidKillSpacesToCheck.append([estimateX, estimateY])
-                if not bypassCheck: break
+                if not bypassCheck: pieceValidKillSpacesToCheck.append([estimateX, estimateY])
+                break
             else:
                 pass
     #Knight - 4 - nonlinear
@@ -684,13 +684,6 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
     elif pieces[pieceNum][0] == 6:
         killSpacesFound = True
         pieceValidKillSpacesToCheck = [[x, y + 1], [x + 1, y + 1], [x + 1, y], [x + 1, y - 1], [x, y - 1], [x - 1, y - 1], [x - 1, y], [x - 1, y + 1]]
-        if not forCheck:
-            GetAllAttacksOfEnemies(whoseTurn)
-            for a in range(len(pieceValidKillSpacesCheckAll)):
-                for b in range(len(pieceValidKillSpacesToCheck)):
-                    if(pieceValidKillSpacesCheckAll[a][0] == pieceValidKillSpacesToCheck[b][0] and pieceValidKillSpacesCheckAll[a][1] == pieceValidKillSpacesToCheck[b][1]):
-                        if draw: CreateTempSprite(600, assets.animation("""invalidSpaceAnim"""), pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 40, 0, 0, 10, True)
-                        pieceValidKillSpacesToCheck.remove_at(b)
     if killSpacesFound:
         pass
     else:
@@ -703,6 +696,14 @@ def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = Fal
                     pieceValidKillSpacesChecked.append([pieces[i][2], pieces[i][3]])
     else:
         pieceValidKillSpacesChecked = pieceValidKillSpacesToCheck
+
+    if pieces[pieceNum][0] == 6 and not forCheck:
+        GetAllAttacksOfEnemies(whoseTurn)
+        for a in range(len(pieceValidKillSpacesCheckAll)):
+            for b in range(len(pieceValidKillSpacesChecked)):
+                if(pieceValidKillSpacesCheckAll[a][0] == pieceValidKillSpacesChecked[b][0] and pieceValidKillSpacesCheckAll[a][1] == pieceValidKillSpacesChecked[b][1]):
+                    if draw: CreateTempSprite(600, assets.animation("""invalidSpaceAnim"""), pieceValidKillSpacesCheckAll[a][0], pieceValidKillSpacesCheckAll[a][1], 40, 0, 0, 10, True)
+                    pieceValidKillSpacesChecked.remove_at(b)
     if arrayType == 0:
         pieceValidKillSpaces = pieceValidKillSpacesChecked
         pieceValidKillSpacesChecked = []
@@ -1015,9 +1016,10 @@ def selectorPickUp():
             selectorData[4] = selectorData[1]
             break
     if pieceFound and pieces[selectorData[2]][1] == whoseTurn:
-        if pieces[selectorData[2]][1] == whoseTurn and CalculateValidSpaces(selectorData[2]):
+        if pieces[selectorData[2]][1] == whoseTurn and (CalculateValidSpaces(selectorData[2]) or CalculateKillSpaces(selectorData[2])):
             print("selectorPickUp-valid moves")
-            animation.run_image_animation(selector,assets.animation("""selectorPickupAnim"""), 30, False)
+            if whoseTurn == 0: animation.run_image_animation(selector,assets.animation("""selectorPickupAnim"""), 30, False)
+            elif whoseTurn == 1: animation.run_image_animation(selector,assets.animation("""selectorBlackPickupAnim"""), 30, False)
             #PickUpSoundEffect()
             controller.A.on_event(ControllerButtonEvent.PRESSED, ButtonBoundSelectorPutDown)
             controller.B.on_event(ControllerButtonEvent.PRESSED, selectorPutDownCancel)
@@ -1046,19 +1048,6 @@ def selectorPickUp():
             if pieces[selectorData[2]][0] == 6: CalculateCastleSpaces(selectorData[2],True)
             pieceFound = False
             BindAll(True)
-        elif CalculateKillSpaces(selectorData[2]):
-            print("PickUp-moves failed, kills valid")
-            animation.run_image_animation(selector,assets.animation("""selectorPickupAnim"""), 30, False)
-            #PickUpSoundEffect()
-            controller.A.on_event(ControllerButtonEvent.PRESSED, ButtonBoundSelectorPutDown)
-            piecesSprites[selectorData[2]].set_position(piecesSprites[selectorData[2]].x,
-                piecesSprites[selectorData[2]].y - 10)
-            piecesSprites[selectorData[2]].z = 3
-            piecesSprites[selectorData[2]].y += 1
-            CalculateValidSpaces(selectorData[2],True)
-            CalculateKillSpaces(selectorData[2],True,0,False)
-            pieceFound = False
-            piecesSprites[selectorData[2]].y -= 1
         else:
             print("PickUp-No valid spaces")
             selectorPutDown(True)
@@ -1119,6 +1108,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
                     pieces[i][2] = 10 + (whoseTurn * 2)
                     pieces[i][3] = 4
                     SetPositionOnBoard(piecesSprites[i], pieces[i][2], pieces[i][3], False, 0, currentOffset)
+                    piecesSprites[i].z = currentOffset
                     break
         if swapPlace:
             for i in range(len(pieces)):
@@ -1148,7 +1138,8 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
         for i in range(len(pieceValidCastleSprites)):
             pieceValidCastleSprites[i].destroy()
         if not noAnim and not promotion :
-            animation.run_image_animation(selector,assets.animation("""selectorPutdownAnim"""), 50, False)
+            if whoseTurn == 0: animation.run_image_animation(selector,assets.animation("""selectorPutdownAnim"""), 30, False)
+            elif whoseTurn == 1: animation.run_image_animation(selector,assets.animation("""selectorBlackPutdownAnim"""), 30, False)
             tempMemory = selectorData[2]
             piecesSprites[tempMemory].y -= 9
             SafeAnimPause(250)
