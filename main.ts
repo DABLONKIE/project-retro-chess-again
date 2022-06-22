@@ -1602,6 +1602,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
             return
         } else {
             console.log("SelectorPutDown-Does stop check")
+            check = 0
             pieces = piecesBuffer
             
         }

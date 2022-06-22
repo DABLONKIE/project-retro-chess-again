@@ -1079,6 +1079,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
             return
         else:
             print("SelectorPutDown-Does stop check")
+            check = 0
             pieces = piecesBuffer
             pass
     for i in range(len(pieceValidSpaces)):
