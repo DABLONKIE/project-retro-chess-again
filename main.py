@@ -32,12 +32,17 @@ selectorData = [4, 4, None]
 pawnFirstMove = False
 selector = None
 turnPawn = None
-title = None
+title: Sprite = None
+buttonPlay: Sprite = None
+buttonSettings: Sprite = None
 colorPalletteSwitched = True
-gamma = 0
+if blockSettings.read_number("Gamma") == None:
+    blockSettings.write_number("Gamma", 0)
+gamma = blockSettings.read_number("Gamma")
 chosen = 0
 check = 0
-buttonSelected = 0
+buttonSelected = 1
+buttonSelectedMax = 2
 swapType = 0
 checked = 2 #0 = white | 1 = black | 2 = none
 pieceAssetReference = [
@@ -100,9 +105,9 @@ pieces = [
     [6, 1, 4, 8, 0, 1],
     [5, 1, 5, 8, 0]]
 
-pieces = [[5,0,4,4,0],[6,1,3,5,0,1],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
+#pieces = [[5,0,4,4,0],[6,1,3,5,0,1],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
 #pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
-pieces = [[1,0,8,1,0,1]]
+#pieces = [[1,0,8,1,0,1]]
 # ---------------------------------------------------------------------------------------- Board Funcs
 def DrawPiecesProportionally(): #Takes the pieces array and creates pieces accordingly.
     global pieceAssetReference, piecesSprites
@@ -824,16 +829,64 @@ def Setup(): #Initialize Commands, game is inert without them.
     controller.left.on_event(ControllerButtonEvent.PRESSED, SelectorGoLEFT)
     controller.right.on_event(ControllerButtonEvent.PRESSED, SelectorGoRIGHT)
 def MainMenu(): #Draw menu and bind menu buttons. Also it looks cool :)
-    global title
+    global title, buttonSelected
     UpdateColors()
+    buttonSelected = 0
     title = sprites.create(assets.image("""title"""))
     buttonPlay = sprites.create(assets.image("""buttonPlay"""))
-    buttonPlay.x = 20
+    buttonPlay.x = 27
     buttonPlay.y = 50
     buttonSettings = sprites.create(assets.image("""buttonSettings"""))
     buttonSettings.x = 27
     buttonSettings.y = 65
     title.y = 20
+    
+    def IncreaseSelection():
+        global buttonSelected, buttonSelectedMax
+        buttonSelected += 1
+        if buttonSelected > buttonSelectedMax:
+            buttonSelected = buttonSelectedMax
+        buttonPlay.x = 27
+        buttonSettings.x = 27
+        if buttonSelected == 1:
+            buttonPlay.x += 5
+        elif buttonSelected == 2:
+            buttonSettings.x += 5
+    def DecreaseSelection():
+        global buttonSelected, buttonSelectedMax
+        buttonSelected -= 1
+        if buttonSelected < 1:
+            buttonSelected = 1
+        buttonPlay.x = 27
+        buttonSettings.x = 27
+        if buttonSelected == 1:
+            buttonPlay.x += 5
+        elif buttonSelected == 2:
+            buttonSettings.x += 5
+    def SelectSelection():
+        global gamma
+        if buttonSelected == 1:
+            title.destroy()
+            buttonPlay.destroy()
+            buttonSettings.destroy()
+            for i in range(50):
+                gamma -= 4
+                UpdateColors()
+                pause(1)
+            Setup()
+            UnbindAll()
+            for i in range(50):
+                gamma += 4
+                UpdateColors()
+                pause(1)
+            BindAll()
+        if buttonSelected == 2:
+            gamma = game.ask_for_number("Set gamma.")
+            blockSettings.write_number("Gamma", gamma)
+            UpdateColors()
+    controller.up.on_event(ControllerButtonEvent.PRESSED, DecreaseSelection)
+    controller.down.on_event(ControllerButtonEvent.PRESSED, IncreaseSelection)
+    controller.A.on_event(ControllerButtonEvent.PRESSED, SelectSelection)
     animation.run_image_animation(title, assets.animation("""titleAnim"""), 1000, True)
     scene.set_background_image(assets.image("""mainMenu"""))
 def PromotionSequence(pnum, team): #Sequence of promoting a pawn, mostly code about chosing the piece
@@ -1228,7 +1281,6 @@ def CalPieceSprite(pieceClass : number, team): #Get the sprite according to clas
         offset = 5
     spriteIndex = pieceClass + offset
     return pieceAssetReference[spriteIndex]
-
 # ---------------------------------------------------------------------------------------- Starting Code
 controller.menu.on_event(ControllerButtonEvent.PRESSED, None)
 MainMenu()

@@ -30,12 +30,19 @@ selectorData = [4, 4, null]
 let pawnFirstMove = false
 selector = null
 turnPawn = null
-let title = null
+let title : Sprite = null
+let buttonPlay : Sprite = null
+let buttonSettings : Sprite = null
 let colorPalletteSwitched = true
-let gamma = 0
+if (blockSettings.readNumber("Gamma") == null) {
+    blockSettings.writeNumber("Gamma", 0)
+}
+
+let gamma = blockSettings.readNumber("Gamma")
 let chosen = 0
 let check = 0
-let buttonSelected = 0
+let buttonSelected = 1
+let buttonSelectedMax = 2
 let swapType = 0
 let checked = 2
 // 0 = white | 1 = black | 2 = none
@@ -50,10 +57,9 @@ let deadPiecesOffsetBlack = 0
 //  4: if disabled (1), it will not be considered. 
 //  5: special tag, for example, pawn not moved, king castlin
 pieces = [[1, 0, 1, 2, 0, 1], [1, 0, 2, 2, 0, 1], [1, 0, 3, 2, 0, 1], [1, 0, 4, 2, 0, 1], [1, 0, 5, 2, 0, 1], [1, 0, 6, 2, 0, 1], [1, 0, 7, 2, 0, 1], [1, 0, 8, 2, 0, 1], [3, 0, 1, 1, 0], [3, 0, 8, 1, 0], [4, 0, 2, 1, 0], [4, 0, 7, 1, 0], [2, 0, 3, 1, 0], [2, 0, 6, 1, 0], [6, 0, 4, 1, 0, 1], [5, 0, 5, 1, 0], [1, 1, 1, 7, 0, 1], [1, 1, 2, 7, 0, 1], [1, 1, 3, 7, 0, 1], [1, 1, 4, 7, 0, 1], [1, 1, 5, 7, 0, 1], [1, 1, 6, 7, 0, 1], [1, 1, 7, 7, 0, 1], [1, 1, 8, 7, 0, 1], [3, 1, 1, 8, 0], [3, 1, 8, 8, 0], [4, 1, 2, 8, 0], [4, 1, 7, 8, 0], [2, 1, 3, 8, 0], [2, 1, 6, 8, 0], [6, 1, 4, 8, 0, 1], [5, 1, 5, 8, 0]]
-pieces = [[5, 0, 4, 4, 0], [6, 1, 3, 5, 0, 1], [1, 0, 4, 5, 0, 1], [1, 0, 8, 1, 0, 1]]
-// Check testing
+// pieces = [[5,0,4,4,0],[6,1,3,5,0,1],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
 // pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
-pieces = [[1, 0, 8, 1, 0, 1]]
+// pieces = [[1,0,8,1,0,1]]
 //  ---------------------------------------------------------------------------------------- Board Funcs
 function DrawPiecesProportionally() {
     // Takes the pieces array and creates pieces accordingly.
@@ -1275,14 +1281,76 @@ function MainMenu() {
     // Draw menu and bind menu buttons. Also it looks cool :)
     
     UpdateColors()
+    buttonSelected = 0
     title = sprites.create(assets.image`title`)
     let buttonPlay = sprites.create(assets.image`buttonPlay`)
-    buttonPlay.x = 20
+    buttonPlay.x = 27
     buttonPlay.y = 50
     let buttonSettings = sprites.create(assets.image`buttonSettings`)
     buttonSettings.x = 27
     buttonSettings.y = 65
     title.y = 20
+    controller.up.onEvent(ControllerButtonEvent.Pressed, function DecreaseSelection() {
+        
+        buttonSelected -= 1
+        if (buttonSelected < 1) {
+            buttonSelected = 1
+        }
+        
+        buttonPlay.x = 27
+        buttonSettings.x = 27
+        if (buttonSelected == 1) {
+            buttonPlay.x += 5
+        } else if (buttonSelected == 2) {
+            buttonSettings.x += 5
+        }
+        
+    })
+    controller.down.onEvent(ControllerButtonEvent.Pressed, function IncreaseSelection() {
+        
+        buttonSelected += 1
+        if (buttonSelected > buttonSelectedMax) {
+            buttonSelected = buttonSelectedMax
+        }
+        
+        buttonPlay.x = 27
+        buttonSettings.x = 27
+        if (buttonSelected == 1) {
+            buttonPlay.x += 5
+        } else if (buttonSelected == 2) {
+            buttonSettings.x += 5
+        }
+        
+    })
+    controller.A.onEvent(ControllerButtonEvent.Pressed, function SelectSelection() {
+        let i: number;
+        
+        if (buttonSelected == 1) {
+            title.destroy()
+            buttonPlay.destroy()
+            buttonSettings.destroy()
+            for (i = 0; i < 50; i++) {
+                gamma -= 4
+                UpdateColors()
+                pause(1)
+            }
+            Setup()
+            UnbindAll()
+            for (i = 0; i < 50; i++) {
+                gamma += 4
+                UpdateColors()
+                pause(1)
+            }
+            BindAll()
+        }
+        
+        if (buttonSelected == 2) {
+            gamma = game.askForNumber("Set gamma.")
+            blockSettings.writeNumber("Gamma", gamma)
+            UpdateColors()
+        }
+        
+    })
     animation.runImageAnimation(title, assets.animation`titleAnim`, 1000, true)
     scene.setBackgroundImage(assets.image`mainMenu`)
 }
