@@ -41,7 +41,7 @@ if blockSettings.read_number("Gamma") == None:
 gamma = blockSettings.read_number("Gamma")
 chosen = 0
 check = 0
-buttonSelected = 1
+buttonSelected = 0
 buttonSelectedMax = 2
 swapType = 0
 checked = 2 #0 = white | 1 = black | 2 = none
@@ -105,7 +105,7 @@ pieces = [
     [6, 1, 4, 8, 0, 1],
     [5, 1, 5, 8, 0]]
 
-#pieces = [[5,0,4,4,0],[6,1,3,5,0,1],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
+pieces = [[5,0,4,4,0],[6,1,2,6,0,1],[3,1,1,5,0],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
 #pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
 #pieces = [[1,0,8,1,0,1]]
 # ---------------------------------------------------------------------------------------- Board Funcs
@@ -406,7 +406,7 @@ def CalculateValidSpaces(pieceNum, draw = False, arrayType = 0): #Calculates mov
     return validSpacesFound
 def CalculateKillSpaces(pieceNum, draw = False, arrayType = 0, bypassCheck = False, forCheck = False): #Calculates the available kills for the specified piece.
     global pieces, pieceValidKillSpaces, pieceValidKillSprites, whoseTurn, pieceValidKillSpacesCheckMate, pieceValidKillSpacesCheckAll,killSpaceAssetRefernce
-    print("CalculateKillSpaces-Initialized")
+    #print("CalculateKillSpaces-Initialized")
     if arrayType != 0:
         print("CalculateKillSpaces-arrayType-"+arrayType)
     if pieces[pieceNum][4] == 1:
@@ -762,14 +762,13 @@ def CalculateCastleSpaces(pieceNum, draw = False):
     if castleSpaceFound:
         return True
     return False
-def CheckForChecks(): #Is the king in peril?
+def CheckForChecks(prediction = False): #Is the king in peril?
     global pieces, whoseTurn, whoseTurnInvert, checked, pieceValidKillSpacesCheckAll, checkmateBar, check
     print("CheckForChecks-Started")
     #here goes nothin!!!
     kingID = 0
     actuallyChecked = False
-    print("CheckForChecks-ally:"+whoseTurn)
-    print("CheckForChecks-foe:"+whoseTurnInvert)
+    print("CheckForChecks-Chosen Ally:"+whoseTurn)
     for i in range(pieces.length):
         if pieces[i][0] == 6 and pieces[i][1] == whoseTurn:
             kingID = i
@@ -780,19 +779,18 @@ def CheckForChecks(): #Is the king in peril?
         #print("CheckForChecks-Running Y "+pieceValidKillSpacesCheckAll[i][1])
         if pieces[kingID][2] == pieceValidKillSpacesCheckAll[i][0] and pieces[kingID][3] == pieceValidKillSpacesCheckAll[i][1]:
             print("CheckForChecks-King" + whoseTurn + " is in peril!")
-            checked = whoseTurn
             actuallyChecked = True
-    if actuallyChecked:
+    if actuallyChecked and not prediction:
         check = 1
         animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarCheck"""), 50, False)
         if not CanKingMove():
             check = 2
             animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarCheckmate"""), 50, False)
-    else:
+    elif not prediction:
         if check == 1: animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarDecheck"""), 50, False)
     print("CheckForChecks-Complete-SpotsFound-"+len(pieceValidKillSpacesCheckAll))
     print("CheckForChecks-deletedAltArray")
-    print("----------------------------NEW-TURN")
+    return(actuallyChecked)
 def GetAllAttacksOfEnemies(recievingTeam): #Get ALL attack spaces of enemies for king movement
     global pieces, whoseTurn, pieceValidKillSpacesCheckAll
     pieceValidKillSpacesCheckAll = []
@@ -1017,7 +1015,7 @@ def selectorPickUp():
             break
     if pieceFound and pieces[selectorData[2]][1] == whoseTurn:
         if pieces[selectorData[2]][1] == whoseTurn and (CalculateValidSpaces(selectorData[2]) or CalculateKillSpaces(selectorData[2])):
-            print("selectorPickUp-valid moves")
+            print("SelectorPickUp-valid moves")
             if whoseTurn == 0: animation.run_image_animation(selector,assets.animation("""selectorPickupAnim"""), 30, False)
             elif whoseTurn == 1: animation.run_image_animation(selector,assets.animation("""selectorBlackPickupAnim"""), 30, False)
             #PickUpSoundEffect()
@@ -1049,13 +1047,13 @@ def selectorPickUp():
             pieceFound = False
             BindAll(True)
         else:
-            print("PickUp-No valid spaces")
+            print("SelectorPickUp-No valid spaces")
             selectorPutDown(True)
             pieceFound = False
             selectorData[2] = None
             #DenySoundEffect()
     else:
-        print("PickUp-Piece was not found")
+        print("SelectorPickUp-Piece was not found")
         selectorPutDown(True)
         pieceFound = False
         selectorData[2] = None
@@ -1063,10 +1061,26 @@ def selectorPickUp():
     BindAll(False)
 def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
     global placeFound, pieceValidSprites, pieceValidSpaces, pieceValidKillSprites, pieceValidKillSpaces, pieceValidCastleSpaces, pieceValidCastleSprites, pieces, pawnFirstMove
-    global swapType, whoseTurnInvert, deadPiecesOffsetWhite, deadPiecesOffsetBlack
+    global swapType, whoseTurnInvert, deadPiecesOffsetWhite, deadPiecesOffsetBlack, check
     killingPlace = False
     swapPlace = False
     #UnbindAll()
+    if check != 0:
+        piecesBuffer = pieces
+        pieces[selectorData[2]][2] = selectorData[0]
+        pieces[selectorData[2]][3] = selectorData[1]
+        GetAllAttacksOfEnemies(whoseTurn)
+        if CheckForChecks(True):
+            print("SelectorPutDown-Doesnt stop check")
+            pieces = piecesBuffer
+            for i in range(len(pieces)):
+                if pieces[i][0] == 6 and pieces[i][1] == whoseTurn:
+                    CreateTempSprite(800,assets.animation("attention"),pieces[i][2],pieces[i][3],200,0,0,-1,True)
+            return
+        else:
+            print("SelectorPutDown-Does stop check")
+            pieces = piecesBuffer
+            pass
     for i in range(len(pieceValidSpaces)):
         if selectorData[0] == pieceValidSpaces[i][0] and selectorData[1] == pieceValidSpaces[i][1]:
             placeFound = True

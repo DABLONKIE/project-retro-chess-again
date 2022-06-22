@@ -41,7 +41,7 @@ if (blockSettings.readNumber("Gamma") == null) {
 let gamma = blockSettings.readNumber("Gamma")
 let chosen = 0
 let check = 0
-let buttonSelected = 1
+let buttonSelected = 0
 let buttonSelectedMax = 2
 let swapType = 0
 let checked = 2
@@ -57,7 +57,8 @@ let deadPiecesOffsetBlack = 0
 //  4: if disabled (1), it will not be considered. 
 //  5: special tag, for example, pawn not moved, king castlin
 pieces = [[1, 0, 1, 2, 0, 1], [1, 0, 2, 2, 0, 1], [1, 0, 3, 2, 0, 1], [1, 0, 4, 2, 0, 1], [1, 0, 5, 2, 0, 1], [1, 0, 6, 2, 0, 1], [1, 0, 7, 2, 0, 1], [1, 0, 8, 2, 0, 1], [3, 0, 1, 1, 0], [3, 0, 8, 1, 0], [4, 0, 2, 1, 0], [4, 0, 7, 1, 0], [2, 0, 3, 1, 0], [2, 0, 6, 1, 0], [6, 0, 4, 1, 0, 1], [5, 0, 5, 1, 0], [1, 1, 1, 7, 0, 1], [1, 1, 2, 7, 0, 1], [1, 1, 3, 7, 0, 1], [1, 1, 4, 7, 0, 1], [1, 1, 5, 7, 0, 1], [1, 1, 6, 7, 0, 1], [1, 1, 7, 7, 0, 1], [1, 1, 8, 7, 0, 1], [3, 1, 1, 8, 0], [3, 1, 8, 8, 0], [4, 1, 2, 8, 0], [4, 1, 7, 8, 0], [2, 1, 3, 8, 0], [2, 1, 6, 8, 0], [6, 1, 4, 8, 0, 1], [5, 1, 5, 8, 0]]
-// pieces = [[5,0,4,4,0],[6,1,3,5,0,1],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
+pieces = [[5, 0, 4, 4, 0], [6, 1, 2, 6, 0, 1], [3, 1, 1, 5, 0], [1, 0, 4, 5, 0, 1], [1, 0, 8, 1, 0, 1]]
+// Check testing
 // pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
 // pieces = [[1,0,8,1,0,1]]
 //  ---------------------------------------------------------------------------------------- Board Funcs
@@ -539,7 +540,7 @@ function CalculateKillSpaces(pieceNum: number, draw: boolean = false, arrayType:
     let b: number;
     // Calculates the available kills for the specified piece.
     
-    console.log("CalculateKillSpaces-Initialized")
+    // print("CalculateKillSpaces-Initialized")
     if (arrayType != 0) {
         console.log("CalculateKillSpaces-arrayType-" + arrayType)
     }
@@ -1181,7 +1182,7 @@ function CalculateCastleSpaces(pieceNum: number, draw: boolean = false): boolean
     return false
 }
 
-function CheckForChecks() {
+function CheckForChecks(prediction: boolean = false): boolean {
     let i: number;
     // Is the king in peril?
     
@@ -1189,8 +1190,7 @@ function CheckForChecks() {
     // here goes nothin!!!
     let kingID = 0
     let actuallyChecked = false
-    console.log("CheckForChecks-ally:" + whoseTurn)
-    console.log("CheckForChecks-foe:" + whoseTurnInvert)
+    console.log("CheckForChecks-Chosen Ally:" + whoseTurn)
     for (i = 0; i < pieces.length; i++) {
         if (pieces[i][0] == 6 && pieces[i][1] == whoseTurn) {
             kingID = i
@@ -1204,12 +1204,11 @@ function CheckForChecks() {
         // print("CheckForChecks-Running Y "+pieceValidKillSpacesCheckAll[i][1])
         if (pieces[kingID][2] == pieceValidKillSpacesCheckAll[i][0] && pieces[kingID][3] == pieceValidKillSpacesCheckAll[i][1]) {
             console.log("CheckForChecks-King" + whoseTurn + " is in peril!")
-            checked = whoseTurn
             actuallyChecked = true
         }
         
     }
-    if (actuallyChecked) {
+    if (actuallyChecked && !prediction) {
         check = 1
         animation.runImageAnimation(checkmateBar, assets.animation`checkmateBarCheck`, 50, false)
         if (!CanKingMove()) {
@@ -1217,13 +1216,16 @@ function CheckForChecks() {
             animation.runImageAnimation(checkmateBar, assets.animation`checkmateBarCheckmate`, 50, false)
         }
         
-    } else if (check == 1) {
-        animation.runImageAnimation(checkmateBar, assets.animation`checkmateBarDecheck`, 50, false)
+    } else if (!prediction) {
+        if (check == 1) {
+            animation.runImageAnimation(checkmateBar, assets.animation`checkmateBarDecheck`, 50, false)
+        }
+        
     }
     
     console.log("CheckForChecks-Complete-SpotsFound-" + pieceValidKillSpacesCheckAll.length)
     console.log("CheckForChecks-deletedAltArray")
-    console.log("----------------------------NEW-TURN")
+    return actuallyChecked
 }
 
 function GetAllAttacksOfEnemies(recievingTeam: number) {
@@ -1515,7 +1517,7 @@ function selectorPickUp() {
     }
     if (pieceFound && pieces[selectorData[2]][1] == whoseTurn) {
         if (pieces[selectorData[2]][1] == whoseTurn && (CalculateValidSpaces(selectorData[2]) || CalculateKillSpaces(selectorData[2]))) {
-            console.log("selectorPickUp-valid moves")
+            console.log("SelectorPickUp-valid moves")
             if (whoseTurn == 0) {
                 animation.runImageAnimation(selector, assets.animation`selectorPickupAnim`, 30, false)
             } else if (whoseTurn == 1) {
@@ -1553,7 +1555,7 @@ function selectorPickUp() {
             pieceFound = false
             BindAll(true)
         } else {
-            console.log("PickUp-No valid spaces")
+            console.log("SelectorPickUp-No valid spaces")
             selectorPutDown(true)
             pieceFound = false
             selectorData[2] = null
@@ -1561,7 +1563,7 @@ function selectorPickUp() {
         
     } else {
         // DenySoundEffect()
-        console.log("PickUp-Piece was not found")
+        console.log("SelectorPickUp-Piece was not found")
         selectorPutDown(true)
         pieceFound = false
         selectorData[2] = null
@@ -1572,6 +1574,7 @@ function selectorPickUp() {
 }
 
 function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = false, noAnim: boolean = false) {
+    let piecesBuffer: number[][];
     let i: number;
     let teamBuffer: number;
     let promotion: boolean;
@@ -1582,6 +1585,29 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
     let killingPlace = false
     let swapPlace = false
     // UnbindAll()
+    if (check != 0) {
+        piecesBuffer = pieces
+        pieces[selectorData[2]][2] = selectorData[0]
+        pieces[selectorData[2]][3] = selectorData[1]
+        GetAllAttacksOfEnemies(whoseTurn)
+        if (CheckForChecks(true)) {
+            console.log("SelectorPutDown-Doesnt stop check")
+            pieces = piecesBuffer
+            for (i = 0; i < pieces.length; i++) {
+                if (pieces[i][0] == 6 && pieces[i][1] == whoseTurn) {
+                    CreateTempSprite(800, assets.animation`attention`, pieces[i][2], pieces[i][3], 200, 0, 0, -1, true)
+                }
+                
+            }
+            return
+        } else {
+            console.log("SelectorPutDown-Does stop check")
+            pieces = piecesBuffer
+            
+        }
+        
+    }
+    
     for (i = 0; i < pieceValidSpaces.length; i++) {
         if (selectorData[0] == pieceValidSpaces[i][0] && selectorData[1] == pieceValidSpaces[i][1]) {
             placeFound = true
