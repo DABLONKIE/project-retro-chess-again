@@ -23,6 +23,7 @@ whoseTurn = 0
 whoseTurnInvert = 1
 pieceFound = False
 volume = 0
+sequence = 0
 turnPawn: Sprite = None
 selector: Sprite = None
 checkmateBar: Sprite = None
@@ -34,6 +35,7 @@ selector = None
 turnPawn = None
 title: Sprite = None
 buttonPlay: Sprite = None
+dialogue: Sprite = None
 buttonSettings: Sprite = None
 colorPalletteSwitched = True
 if blockSettings.read_number("Gamma") == None:
@@ -41,6 +43,7 @@ if blockSettings.read_number("Gamma") == None:
 gamma = blockSettings.read_number("Gamma")
 chosen = 0
 check = 0
+dialogueOpen = False
 buttonSelected = 0
 buttonSelectedMax = 2
 swapType = 0
@@ -828,7 +831,8 @@ def Setup(): #Initialize Commands, game is inert without them.
     controller.left.on_event(ControllerButtonEvent.PRESSED, SelectorGoLEFT)
     controller.right.on_event(ControllerButtonEvent.PRESSED, SelectorGoRIGHT)
 def MainMenu(): #Draw menu and bind menu buttons. Also it looks cool :)
-    global title, buttonSelected
+    global title, buttonSelected, sequence
+    sequence = 1
     UpdateColors()
     buttonSelected = 0
     title = sprites.create(assets.image("""title"""))
@@ -839,7 +843,10 @@ def MainMenu(): #Draw menu and bind menu buttons. Also it looks cool :)
     buttonSettings.x = 27
     buttonSettings.y = 65
     title.y = 20
-    
+    def BindMenuButtons():
+        controller.up.on_event(ControllerButtonEvent.PRESSED, DecreaseSelection)
+        controller.down.on_event(ControllerButtonEvent.PRESSED, IncreaseSelection)
+        controller.A.on_event(ControllerButtonEvent.PRESSED, SelectSelection)
     def IncreaseSelection():
         global buttonSelected, buttonSelectedMax
         buttonSelected += 1
@@ -880,9 +887,13 @@ def MainMenu(): #Draw menu and bind menu buttons. Also it looks cool :)
                 pause(1)
             BindAll()
         if buttonSelected == 2:
-            gamma = game.ask_for_number("Set gamma.")
-            blockSettings.write_number("Gamma", gamma)
+            OpenDialogue()
+            if gamma > 50 or gamma < -30 or gamma == None or gamma != gamma:  game.splash("Invalid gamma number.")
+            else: blockSettings.write_number("Gamma", gamma)
+            gamma = blockSettings.read_number("Gamma")
+            print(gamma)
             UpdateColors()
+            controller.B.on_event(ControllerButtonEvent.PRESSED, CloseDialogue,)
     controller.up.on_event(ControllerButtonEvent.PRESSED, DecreaseSelection)
     controller.down.on_event(ControllerButtonEvent.PRESSED, IncreaseSelection)
     controller.A.on_event(ControllerButtonEvent.PRESSED, SelectSelection)
@@ -1061,7 +1072,7 @@ def selectorPickUp():
     BindAll(False)
 def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
     global placeFound, pieceValidSprites, pieceValidSpaces, pieceValidKillSprites, pieceValidKillSpaces, pieceValidCastleSpaces, pieceValidCastleSprites, pieces, pawnFirstMove
-    global swapType, whoseTurnInvert, deadPiecesOffsetWhite, deadPiecesOffsetBlack, check
+    global swapType, whoseTurnInvert, deadPiecesOffsetWhite, deadPiecesOffsetBlack, check, whoseTurn
     killingPlace = False
     swapPlace = False
     #UnbindAll()
@@ -1070,7 +1081,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
         pieces[selectorData[2]][2] = selectorData[0]
         pieces[selectorData[2]][3] = selectorData[1]
         GetAllAttacksOfEnemies(whoseTurn)
-        if CheckForChecks(True):
+        if CheckForChecks(True) and not bypassCheck:
             print("SelectorPutDown-Doesnt stop check")
             pieces = piecesBuffer
             for i in range(len(pieces)):
@@ -1172,7 +1183,8 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
             timer.after(250, frame4)
         elif not promotion:
             #piecesSprites[selectorData[2]].y -= 1
-            selector.set_image(assets.image("""selector"""))
+            if whoseTurn == 0: selector.set_image(assets.image("""selector"""))
+            else: selector.set_image(assets.image("""selectorBlack"""))
         elif promotion:
             PromotionSequence(selectorData[2], teamBuffer)
         selectorData[2] = None
@@ -1287,6 +1299,17 @@ def CalPieceSprite(pieceClass : number, team): #Get the sprite according to clas
         offset = 5
     spriteIndex = pieceClass + offset
     return pieceAssetReference[spriteIndex]
+def OpenDialogue():
+    global dialogueOpen,dialogue
+    UnbindAll()
+    dialogueOpen = True
+    dialogue = sprites.create(assets.image("""dialogue"""))
+    animation.run_image_animation(dialogue, assets.animation("dialogueOpen"), 100, False)
+def CloseDialogue():
+    global dialogueOpen,dialogue,sequence
+    dialogueOpen = False
+    CreateTempSprite(700, assets.animation("""dialogueClose"""),dialogue.x/2,dialogue.y/2,100,1,6)
+    dialogue.destroy()
 # ---------------------------------------------------------------------------------------- Starting Code
 controller.menu.on_event(ControllerButtonEvent.PRESSED, None)
 MainMenu()

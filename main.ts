@@ -21,6 +21,7 @@ let whoseTurn = 0
 let whoseTurnInvert = 1
 let pieceFound = false
 let volume = 0
+let sequence = 0
 let turnPawn : Sprite = null
 let selector : Sprite = null
 let checkmateBar : Sprite = null
@@ -32,6 +33,7 @@ selector = null
 turnPawn = null
 let title : Sprite = null
 let buttonPlay : Sprite = null
+let dialogue : Sprite = null
 let buttonSettings : Sprite = null
 let colorPalletteSwitched = true
 if (blockSettings.readNumber("Gamma") == null) {
@@ -41,6 +43,7 @@ if (blockSettings.readNumber("Gamma") == null) {
 let gamma = blockSettings.readNumber("Gamma")
 let chosen = 0
 let check = 0
+let dialogueOpen = false
 let buttonSelected = 0
 let buttonSelectedMax = 2
 let swapType = 0
@@ -1282,6 +1285,7 @@ function Setup() {
 function MainMenu() {
     // Draw menu and bind menu buttons. Also it looks cool :)
     
+    sequence = 1
     UpdateColors()
     buttonSelected = 0
     title = sprites.create(assets.image`title`)
@@ -1292,23 +1296,13 @@ function MainMenu() {
     buttonSettings.x = 27
     buttonSettings.y = 65
     title.y = 20
-    controller.up.onEvent(ControllerButtonEvent.Pressed, function DecreaseSelection() {
-        
-        buttonSelected -= 1
-        if (buttonSelected < 1) {
-            buttonSelected = 1
-        }
-        
-        buttonPlay.x = 27
-        buttonSettings.x = 27
-        if (buttonSelected == 1) {
-            buttonPlay.x += 5
-        } else if (buttonSelected == 2) {
-            buttonSettings.x += 5
-        }
-        
-    })
-    controller.down.onEvent(ControllerButtonEvent.Pressed, function IncreaseSelection() {
+    function BindMenuButtons() {
+        controller.up.onEvent(ControllerButtonEvent.Pressed, DecreaseSelection)
+        controller.down.onEvent(ControllerButtonEvent.Pressed, IncreaseSelection)
+        controller.A.onEvent(ControllerButtonEvent.Pressed, SelectSelection)
+    }
+    
+    function IncreaseSelection() {
         
         buttonSelected += 1
         if (buttonSelected > buttonSelectedMax) {
@@ -1323,8 +1317,26 @@ function MainMenu() {
             buttonSettings.x += 5
         }
         
-    })
-    controller.A.onEvent(ControllerButtonEvent.Pressed, function SelectSelection() {
+    }
+    
+    function DecreaseSelection() {
+        
+        buttonSelected -= 1
+        if (buttonSelected < 1) {
+            buttonSelected = 1
+        }
+        
+        buttonPlay.x = 27
+        buttonSettings.x = 27
+        if (buttonSelected == 1) {
+            buttonPlay.x += 5
+        } else if (buttonSelected == 2) {
+            buttonSettings.x += 5
+        }
+        
+    }
+    
+    function SelectSelection() {
         let i: number;
         
         if (buttonSelected == 1) {
@@ -1347,12 +1359,29 @@ function MainMenu() {
         }
         
         if (buttonSelected == 2) {
-            gamma = game.askForNumber("Set gamma.")
-            blockSettings.writeNumber("Gamma", gamma)
+            OpenDialogue()
+            if (gamma > 50 || gamma < -30 || gamma == null || gamma != gamma) {
+                game.splash("Invalid gamma number.")
+            } else {
+                blockSettings.writeNumber("Gamma", gamma)
+            }
+            
+            gamma = blockSettings.readNumber("Gamma")
+            console.log(gamma)
             UpdateColors()
+            controller.B.onEvent(ControllerButtonEvent.Pressed, function CloseDialogue() {
+                
+                dialogueOpen = false
+                CreateTempSprite(700, assets.animation`dialogueClose`, dialogue.x / 2, dialogue.y / 2, 100, 1, 6)
+                dialogue.destroy()
+            })
         }
         
-    })
+    }
+    
+    controller.up.onEvent(ControllerButtonEvent.Pressed, DecreaseSelection)
+    controller.down.onEvent(ControllerButtonEvent.Pressed, IncreaseSelection)
+    controller.A.onEvent(ControllerButtonEvent.Pressed, SelectSelection)
     animation.runImageAnimation(title, assets.animation`titleAnim`, 1000, true)
     scene.setBackgroundImage(assets.image`mainMenu`)
 }
@@ -1590,7 +1619,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         pieces[selectorData[2]][2] = selectorData[0]
         pieces[selectorData[2]][3] = selectorData[1]
         GetAllAttacksOfEnemies(whoseTurn)
-        if (CheckForChecks(true)) {
+        if (CheckForChecks(true) && !bypassCheck) {
             console.log("SelectorPutDown-Doesnt stop check")
             pieces = piecesBuffer
             for (i = 0; i < pieces.length; i++) {
@@ -1740,7 +1769,12 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
             })
         } else if (!promotion) {
             // piecesSprites[selectorData[2]].y -= 1
-            selector.setImage(assets.image`selector`)
+            if (whoseTurn == 0) {
+                selector.setImage(assets.image`selector`)
+            } else {
+                selector.setImage(assets.image`selectorBlack`)
+            }
+            
         } else if (promotion) {
             PromotionSequence(selectorData[2], teamBuffer)
         }
@@ -1897,6 +1931,14 @@ function CalPieceSprite(pieceClass: number, team: number): Image {
     
     let spriteIndex = pieceClass + offset
     return pieceAssetReference[spriteIndex]
+}
+
+function OpenDialogue() {
+    
+    UnbindAll()
+    dialogueOpen = true
+    dialogue = sprites.create(assets.image`dialogue`)
+    animation.runImageAnimation(dialogue, assets.animation`dialogueOpen`, 100, false)
 }
 
 //  ---------------------------------------------------------------------------------------- Starting Code
