@@ -108,7 +108,7 @@ pieces = [
     [6, 1, 4, 8, 0, 1],
     [5, 1, 5, 8, 0]]
 
-pieces = [[5,0,4,4,0],[6,1,2,6,0,1],[3,1,1,5,0],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
+#pieces = [[5,0,4,4,0],[6,1,2,6,0,1],[3,1,1,5,0],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
 #pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
 #pieces = [[1,0,8,1,0,1]]
 # ---------------------------------------------------------------------------------------- Board Funcs
@@ -132,7 +132,6 @@ def CalculateValidSpaces(pieceNum, draw = False, arrayType = 0): #Calculates mov
     noSpaces = False
     x = pieces[pieceNum][2]
     y = pieces[pieceNum][3]
-    print("CalculateValidSpaces-started")
     if pieces[pieceNum][4] == 1:
         print("CalculateValidSpaces-Piece is disabled, skipping.")
         return False
@@ -391,7 +390,9 @@ def CalculateValidSpaces(pieceNum, draw = False, arrayType = 0): #Calculates mov
     if noSpaces or len(pieceValidSpaces) == 0: #Check 2
         return False
 
-    
+    if arrayType == 1:
+        pieceValidSpaces = []
+
     # Drawing starts HERE-----
     if not draw:
         return validSpacesFound
