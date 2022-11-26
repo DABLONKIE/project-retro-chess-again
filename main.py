@@ -73,7 +73,7 @@ deadPiecesOffsetBlack = 0
 # 1: 0=white 1=black
 # 2,3: numbers are coordinates. Letters and numbers respectively.
 # 4: if disabled (1), it will not be considered. 
-# 5: special tag, for example, pawn not moved, king castlin
+# 5: special tag, for example, pawn not moved, king castling...
 pieces = [
     [1, 0, 1, 2, 0, 1],
     [1, 0, 2, 2, 0, 1],
@@ -108,7 +108,7 @@ pieces = [
     [6, 1, 4, 8, 0, 1],
     [5, 1, 5, 8, 0]]
 
-#pieces = [[5,0,4,4,0],[6,1,2,6,0,1],[3,1,1,5,0],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
+pieces = [[5,0,4,4,0],[6,1,2,6,0,1],[3,1,1,5,0],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
 #pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
 #pieces = [[1,0,8,1,0,1]]
 # ---------------------------------------------------------------------------------------- Board Funcs
@@ -770,6 +770,7 @@ def CheckForChecks(prediction = False): #Is the king in peril?
     global pieces, whoseTurn, whoseTurnInvert, checked, pieceValidKillSpacesCheckAll, checkmateBar, check
     print("CheckForChecks-Started")
     #here goes nothin!!!
+    previousCheck = check
     kingID = 0
     actuallyChecked = False
     print("CheckForChecks-Chosen Ally:"+whoseTurn)
@@ -785,14 +786,16 @@ def CheckForChecks(prediction = False): #Is the king in peril?
             print("CheckForChecks-King" + whoseTurn + " is in peril!")
             actuallyChecked = True
     if actuallyChecked and not prediction:
-        check = 1
+        checked = whoseTurn
         animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarCheck"""), 50, False)
         if not CanKingMove():
+            print("CheckForChecks-True Checkmate!")
             check = 2
-            animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarCheckmate"""), 50, False)
+            #animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarCheckmate"""), 50, False)
     elif not prediction:
-        if check == 1: animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarDecheck"""), 50, False)
+        if check == 0 and previousCheck != check: animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarDecheck"""), 50, False)
     print("CheckForChecks-Complete-SpotsFound-"+len(pieceValidKillSpacesCheckAll))
+    print("CheckForChecks-Complete-CheckValue-"+check)
     print("CheckForChecks-deletedAltArray")
     return(actuallyChecked)
 def GetAllAttacksOfEnemies(recievingTeam): #Get ALL attack spaces of enemies for king movement
@@ -1077,7 +1080,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
     killingPlace = False
     swapPlace = False
     #UnbindAll()
-    if check != 0:
+    if check != 0 and not doNotSwitch:
         piecesBuffer = pieces
         pieces[selectorData[2]][2] = selectorData[0]
         pieces[selectorData[2]][3] = selectorData[1]
@@ -1091,8 +1094,8 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
             return
         else:
             print("SelectorPutDown-Does stop check")
-            check = 0
-            pieces = piecesBuffer
+            #check = 0
+            #pieces = piecesBuffer
             pass
     for i in range(len(pieceValidSpaces)):
         if selectorData[0] == pieceValidSpaces[i][0] and selectorData[1] == pieceValidSpaces[i][1]:
@@ -1196,8 +1199,8 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
         pieceValidCastleSpaces = []
         pieceValidCastleSprites = []
         placeFound = False
-        if not bypassCheck:
-            CheckForChecks()
+    if not (bypassCheck or doNotSwitch):
+        CheckForChecks()
     #BindAll(False)
 def selectorPutDownCancel():
     global pieceFound, selectorData, pawnFirstMove
@@ -1314,5 +1317,4 @@ def CloseDialogue():
 # ---------------------------------------------------------------------------------------- Starting Code
 controller.menu.on_event(ControllerButtonEvent.PRESSED, None)
 MainMenu()
-#Setup()
 
