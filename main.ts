@@ -60,7 +60,7 @@ let deadPiecesOffsetBlack = 0
 //  4: if disabled (1), it will not be considered. 
 //  5: special tag, for example, pawn not moved, king castling...
 pieces = [[1, 0, 1, 2, 0, 1], [1, 0, 2, 2, 0, 1], [1, 0, 3, 2, 0, 1], [1, 0, 4, 2, 0, 1], [1, 0, 5, 2, 0, 1], [1, 0, 6, 2, 0, 1], [1, 0, 7, 2, 0, 1], [1, 0, 8, 2, 0, 1], [3, 0, 1, 1, 0], [3, 0, 8, 1, 0], [4, 0, 2, 1, 0], [4, 0, 7, 1, 0], [2, 0, 3, 1, 0], [2, 0, 6, 1, 0], [6, 0, 4, 1, 0, 1], [5, 0, 5, 1, 0], [1, 1, 1, 7, 0, 1], [1, 1, 2, 7, 0, 1], [1, 1, 3, 7, 0, 1], [1, 1, 4, 7, 0, 1], [1, 1, 5, 7, 0, 1], [1, 1, 6, 7, 0, 1], [1, 1, 7, 7, 0, 1], [1, 1, 8, 7, 0, 1], [3, 1, 1, 8, 0], [3, 1, 8, 8, 0], [4, 1, 2, 8, 0], [4, 1, 7, 8, 0], [2, 1, 3, 8, 0], [2, 1, 6, 8, 0], [6, 1, 4, 8, 0, 1], [5, 1, 5, 8, 0]]
-pieces = [[5, 0, 4, 4, 0], [6, 1, 2, 6, 0, 1], [3, 1, 1, 5, 0], [1, 0, 4, 5, 0, 1], [1, 0, 8, 1, 0, 1]]
+pieces = [[5, 0, 4, 4, 0], [6, 1, 2, 6, 0, 1], [3, 1, 1, 5, 0], [1, 0, 4, 5, 0, 1], [1, 0, 8, 1, 0, 1], [6, 0, 2, 2, 0, 1]]
 // Check testing
 // pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
 // pieces = [[1,0,8,1,0,1]]
@@ -1194,7 +1194,11 @@ function CheckForChecks(prediction: boolean = false): boolean {
     
     console.log("CheckForChecks-Started")
     // here goes nothin!!!
-    let previousCheck = check
+    let previousChecked = checked
+    if (!prediction) {
+        checked = 0
+    }
+    
     let kingID = 0
     let actuallyChecked = false
     console.log("CheckForChecks-Chosen Ally:" + whoseTurn)
@@ -1211,6 +1215,7 @@ function CheckForChecks(prediction: boolean = false): boolean {
         // print("CheckForChecks-Running Y "+pieceValidKillSpacesCheckAll[i][1])
         if (pieces[kingID][2] == pieceValidKillSpacesCheckAll[i][0] && pieces[kingID][3] == pieceValidKillSpacesCheckAll[i][1]) {
             console.log("CheckForChecks-King" + whoseTurn + " is in peril!")
+            check = 1
             actuallyChecked = true
         }
         
@@ -1220,12 +1225,13 @@ function CheckForChecks(prediction: boolean = false): boolean {
         animation.runImageAnimation(checkmateBar, assets.animation`checkmateBarCheck`, 50, false)
         if (!CanKingMove()) {
             console.log("CheckForChecks-True Checkmate!")
-            check = 2
+            check = whoseTurn
         }
         
     } else if (!prediction) {
         // animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarCheckmate"""), 50, False)
-        if (check == 0 && previousCheck != check) {
+        console.log("checking if it's gone")
+        if (checked == 0 && previousChecked != checked) {
             animation.runImageAnimation(checkmateBar, assets.animation`checkmateBarDecheck`, 50, false)
         }
         
@@ -1619,8 +1625,10 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
     
     let killingPlace = false
     let swapPlace = false
+    console.log("SelectorPutDown-Start")
     // UnbindAll()
     if (check != 0 && !doNotSwitch) {
+        console.log("SelectorPutDown-Check Blockage start")
         piecesBuffer = pieces
         pieces[selectorData[2]][2] = selectorData[0]
         pieces[selectorData[2]][3] = selectorData[1]
@@ -1642,19 +1650,24 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
             
         }
         
+        console.log("SelectorPutDown-Check Blockage end")
     }
     
+    console.log("SelectorPutDown-Finding Spot")
     for (i = 0; i < pieceValidSpaces.length; i++) {
         if (selectorData[0] == pieceValidSpaces[i][0] && selectorData[1] == pieceValidSpaces[i][1]) {
             placeFound = true
+            console.log("SelectorPutDown-Found the spot")
             break
         }
         
     }
+    console.log("SelectorPutDown-Finding kill spot")
     for (i = 0; i < pieceValidKillSpaces.length; i++) {
         if (selectorData[0] == pieceValidKillSpaces[i][0] && selectorData[1] == pieceValidKillSpaces[i][1]) {
             killingPlace = true
             placeFound = true
+            console.log("SelectorPutDown-Found the kill spot")
             // KillSoundEffect()
             // tempX, tempY = SetPositionOnBoard(None, selectorData[0],selectorData[1])
             // CreateTempSprite(300, assets.animation("""returnToDust"""), tempX, tempY, 60)
@@ -1662,15 +1675,18 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         }
         
     }
+    console.log("SelectorPutDown-Finding castle spot")
     for (i = 0; i < pieceValidCastleSpaces.length; i++) {
         if (selectorData[0] == pieceValidCastleSpaces[i][0] && selectorData[1] == pieceValidCastleSpaces[i][1]) {
             swapPlace = true
             placeFound = true
+            console.log("SelectorPutDown-Found castle spot")
             break
         }
         
     }
     if (placeFound || bypassCheck) {
+        console.log("SelectorPutDown-Proceeding with placing")
         teamBuffer = whoseTurn
         if (!doNotSwitch) {
             SwitchingSides()
@@ -1686,6 +1702,7 @@ function selectorPutDown(doNotSwitch: boolean = false, bypassCheck: boolean = fa
         }
         
         if (killingPlace) {
+            console.log("SelectorPutDown-Oh boy killing time")
             for (i = 0; i < pieces.length; i++) {
                 if (pieces[i][2] == selectorData[0] && pieces[i][3] == selectorData[1]) {
                     currentOffset = 0
@@ -1836,6 +1853,7 @@ function SwitchingSides() {
         whoseTurn = 0
     }
     
+    console.log("Check: " + check)
 }
 
 function SafePause(time: number, mode: boolean = false) {

@@ -108,7 +108,7 @@ pieces = [
     [6, 1, 4, 8, 0, 1],
     [5, 1, 5, 8, 0]]
 
-pieces = [[5,0,4,4,0],[6,1,2,6,0,1],[3,1,1,5,0],[1,0,4,5,0,1],[1,0,8,1,0,1]]  #Check testing
+pieces = [[5,0,4,4,0],[6,1,2,6,0,1],[3,1,1,5,0],[1,0,4,5,0,1],[1,0,8,1,0,1],[6,0,2,2,0,1]]  #Check testing
 #pieces = [[6,0,4,1,1],[3,0,1,1],[3,0,8,1], [2,1,1,7], [2,1,3,7], [1,0,2,6,1]]  #Castle testing
 #pieces = [[1,0,8,1,0,1]]
 # ---------------------------------------------------------------------------------------- Board Funcs
@@ -770,7 +770,8 @@ def CheckForChecks(prediction = False): #Is the king in peril?
     global pieces, whoseTurn, whoseTurnInvert, checked, pieceValidKillSpacesCheckAll, checkmateBar, check
     print("CheckForChecks-Started")
     #here goes nothin!!!
-    previousCheck = check
+    previousChecked = checked
+    if not prediction: checked = 0
     kingID = 0
     actuallyChecked = False
     print("CheckForChecks-Chosen Ally:"+whoseTurn)
@@ -784,16 +785,18 @@ def CheckForChecks(prediction = False): #Is the king in peril?
         #print("CheckForChecks-Running Y "+pieceValidKillSpacesCheckAll[i][1])
         if pieces[kingID][2] == pieceValidKillSpacesCheckAll[i][0] and pieces[kingID][3] == pieceValidKillSpacesCheckAll[i][1]:
             print("CheckForChecks-King" + whoseTurn + " is in peril!")
+            check = 1
             actuallyChecked = True
     if actuallyChecked and not prediction:
         checked = whoseTurn
         animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarCheck"""), 50, False)
         if not CanKingMove():
             print("CheckForChecks-True Checkmate!")
-            check = 2
+            check = whoseTurn
             #animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarCheckmate"""), 50, False)
     elif not prediction:
-        if check == 0 and previousCheck != check: animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarDecheck"""), 50, False)
+        print("checking if it's gone")
+        if checked == 0 and previousChecked != checked: animation.run_image_animation(checkmateBar, assets.animation("""checkmateBarDecheck"""), 50, False)
     print("CheckForChecks-Complete-SpotsFound-"+len(pieceValidKillSpacesCheckAll))
     print("CheckForChecks-Complete-CheckValue-"+check)
     print("CheckForChecks-deletedAltArray")
@@ -1079,8 +1082,10 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
     global swapType, whoseTurnInvert, deadPiecesOffsetWhite, deadPiecesOffsetBlack, check, whoseTurn
     killingPlace = False
     swapPlace = False
+    print("SelectorPutDown-Start")
     #UnbindAll()
     if check != 0 and not doNotSwitch:
+        print("SelectorPutDown-Check Blockage start")
         piecesBuffer = pieces
         pieces[selectorData[2]][2] = selectorData[0]
         pieces[selectorData[2]][3] = selectorData[1]
@@ -1097,24 +1102,32 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
             #check = 0
             #pieces = piecesBuffer
             pass
+        print("SelectorPutDown-Check Blockage end")
+    print("SelectorPutDown-Finding Spot")
     for i in range(len(pieceValidSpaces)):
         if selectorData[0] == pieceValidSpaces[i][0] and selectorData[1] == pieceValidSpaces[i][1]:
             placeFound = True
+            print("SelectorPutDown-Found the spot")
             break
+    print("SelectorPutDown-Finding kill spot")
     for i in range(len(pieceValidKillSpaces)):
         if selectorData[0] == pieceValidKillSpaces[i][0] and selectorData[1] == pieceValidKillSpaces[i][1]:
             killingPlace = True
             placeFound = True
+            print("SelectorPutDown-Found the kill spot")
             #KillSoundEffect()
             #tempX, tempY = SetPositionOnBoard(None, selectorData[0],selectorData[1])
             #CreateTempSprite(300, assets.animation("""returnToDust"""), tempX, tempY, 60)
             break
+    print("SelectorPutDown-Finding castle spot")
     for i in range(len(pieceValidCastleSpaces)):
         if selectorData[0] == pieceValidCastleSpaces[i][0] and selectorData[1] == pieceValidCastleSpaces[i][1]:
             swapPlace = True
             placeFound = True
+            print("SelectorPutDown-Found castle spot")
             break
     if placeFound or bypassCheck:
+        print("SelectorPutDown-Proceeding with placing")
         teamBuffer = whoseTurn
         if not doNotSwitch: SwitchingSides()
         promotion = False;
@@ -1125,6 +1138,7 @@ def selectorPutDown(doNotSwitch = False, bypassCheck = False, noAnim = False):
         if pawnFirstMove and not bypassCheck:
             pieces[selectorData[2]][5] = 0
         if killingPlace:
+            print("SelectorPutDown-Oh boy killing time")
             for i in range(len(pieces)):
                 if pieces[i][2] == selectorData[0] and pieces[i][3] == selectorData[1]:
                     currentOffset = 0
@@ -1217,7 +1231,7 @@ def selectorPutDownCancel():
     #CancelSoundEffect()
 # ---------------------------------------------------------------------------------------- Misc/QOL Funcs
 def SwitchingSides(): #Switches the sides, self-explanatory.
-    global whoseTurn,whoseTurnInvert
+    global whoseTurn,whoseTurnInvert,check,checked
     bufferTurn = whoseTurn
     print("----------------------SIDES-SWITCHED")
     if whoseTurn == 0:
@@ -1240,6 +1254,7 @@ def SwitchingSides(): #Switches the sides, self-explanatory.
         """))
         whoseTurnInvert = 1
         whoseTurn = 0
+    print("Check: "+check)
 def SafePause(time, mode = False): #Stops the code for a second whilst unbinding the buttons to stop exploits.
     UnbindAll()
     pause(time)
